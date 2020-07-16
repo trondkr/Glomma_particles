@@ -71,6 +71,11 @@ class SedimentDrift(OceanDrift):
         'ocean_vertical_diffusivity': .02,
     }
 
+    configspecSediment = '''
+        [vertical_mixing]
+            update_terminal_velocity = boolean(default=True)
+        '''
+
     def __init__(self, *args, **kwargs):
         """ Constructor of SedimentDrift module
         """
@@ -80,6 +85,7 @@ class SedimentDrift(OceanDrift):
         # By default, sediments do not strand towards coastline
         # TODO: A more sophisticated stranding algorithm is needed
         self.set_config('general:coastline_action', 'previous')
+        self._add_configstring(self.configspecSediment)
 
     def update_terminal_velocity(self, Tprofiles=None, Sprofiles=None, z_index=None):
         #
@@ -132,7 +138,8 @@ class SedimentDrift(OceanDrift):
         # they are resuspended. May then need to send a boolean
         # array to advection methods below
 
-        self.update_terminal_velocity()
+        if self.get_config('vertical_mixing:update_terminal_velocity') is True:
+            self.update_terminal_velocity()
 
         self.advect_ocean_current()
 

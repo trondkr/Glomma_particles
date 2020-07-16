@@ -24,8 +24,6 @@ class Sediment_Organizer:
         self.confobj: MartiniConf = MartiniConf()
 
     def create_output_filenames(self):
-        print("inside", self.confobj.start_date)
-        print(self.confobj.end_date)
         start_date_str: str = '{}{}{}'.format(str(self.confobj.start_date.year),
                                               str(self.confobj.start_date.month).zfill(2),
                                               str(self.confobj.start_date.day).zfill(2))
@@ -59,15 +57,15 @@ class Sediment_Organizer:
         #######################
         # Adjusting configuration
         #######################
-        o.set_config('processes:turbulentmixing', True)
-        o.set_config('processes:verticaladvection', True)
-        o.set_config('turbulentmixing:diffusivitymodel', 'gls_tke')
-        o.set_config('turbulentmixing:TSprofiles', True)
-        # o.set_config('turbulentmixing:mixingmodel','randomwalk')
+        o.set_config('drift:vertical_mixing', True)
+        o.set_config('drift:vertical_advection', True)
+        o.set_config('vertical_mixing:diffusivitymodel', 'gls_tke')
+        o.set_config('vertical_mixing:TSprofiles', True)
+
         o.set_config('drift:scheme', 'runge-kutta4')
-        o.set_config('general:coastline_action', 'previous')
-        o.set_config('general:basemap_resolution', 'f')
         o.set_config('drift:lift_to_seafloor', True)
+
+        o.set_config('vertical_mixing:update_terminal_velocity', True)
 
         # Spread particles/sediments using a Gauss shape in the upper 2 meters
         low_depth, mean_depth, high_depth = -2, -0.5, 0
