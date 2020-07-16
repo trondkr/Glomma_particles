@@ -22,6 +22,7 @@ Based on work by Simon Weppe, MetOcean Solutions Ltd.
 import numpy as np
 from opendrift.models.oceandrift import Lagrangian3DArray
 from opendrift.models.oceandrift import OceanDrift
+from scipy.interpolate import interp1d
 
 
 class SedimentElement(Lagrangian3DArray):
@@ -117,17 +118,25 @@ class SedimentDrift(OceanDrift):
             S0 = Sprofiles[upper, range(Sprofiles.shape[1])] * weight_upper + Sprofiles[
                 lower, range(Sprofiles.shape[1])] * (1 - weight_upper)
 
-        # The density difference between a clay/sand particle and the ambient water
+
+        self.elements.terminal_velocity = \
+            self.calc_terminal_velocity(self.elements.density, self.elements.diameter, T0, S0)
+
+    # Separate the actual calculation so that we can use unit-testing
+    # Returns terminal velocity in m/s
+    def calc_terminal_velocity(self, density_p, diameter_p, T0, S0):
         density_w = self.sea_water_density(T=T0, S=S0)
-        density_p = self.elements.density
+
+        # The density difference between a clay/sand particle and the ambient water
         dr = density_w - density_p
+        print(dr)
 
         # water viscosity
         dynamic_viscosity = 0.001 * (1.7915 - 0.0538 * T0 + 0.007 * (T0 ** (2.0)) - 0.0023 * S0)
         # ~0.0014 kg m-1 s-1
 
         g = 9.81  # ms-2
-        self.elements.terminal_velocity = (self.elements.diameter ** 2 * dr * g) / (18. * dynamic_viscosity)
+        return (diameter_p ** 2 * dr * g) / (18. * dynamic_viscosity)
 
     def update(self):
         """Update positions and properties of sediment particles.

@@ -3,7 +3,6 @@ import os
 import random
 import time
 from datetime import datetime, timedelta
-
 import numpy as np
 from opendrift.readers import reader_ROMS_native
 
@@ -24,28 +23,6 @@ class Sediment_Organizer:
         print("Inside init for sediment organizer")
         self.confobj: MartiniConf = MartiniConf()
 
-    def create_output_filenames(self):
-        start_date_str: str = '{}{}{}'.format(str(self.confobj.start_date.year),
-                                              str(self.confobj.start_date.month).zfill(2),
-                                              str(self.confobj.start_date.day).zfill(2))
-
-        end_date_str: str = '{}{}{}'.format(str(self.confobj.end_date.year),
-                                            str(self.confobj.end_date.month).zfill(2),
-                                            str(self.confobj.end_date.day).zfill(2))
-        print(start_date_str)
-        print(end_date_str)
-        print(self.confobj.species)
-        print(self.confobj.outputdir)
-
-        outputFilename = self.confobj.outputdir + 'Glomma_{}_drift_{}_to_{}.nc'.format(self.confobj.species,
-                                                                                       start_date_str,
-                                                                                       end_date_str)
-
-        if os.path.exists(outputFilename):
-            os.remove(outputFilename)
-        self.confobj.outputFilename = outputFilename
-        logging.debug("Result files will be stored as:\nnetCDF=> {}".format(self.confobj.outputFilename))
-
     # Setup the sediment object and configuration
     def setup_and_config_sediment_module(self) -> SedimentDrift:
         # Setup a new simulation
@@ -61,28 +38,10 @@ class Sediment_Organizer:
 
     def create_and_run_simulation(self):
         o = self.setup_and_config_sediment_module()
-        reader_physics = reader_ROMS_native.Reader(self.confobj.basedir + self.confobj.pattern)
+        reader_physics = reader_ROMS_native.Reader(self.confobj.datadir + self.confobj.pattern)
         o.add_reader([reader_physics])
 
-        if not os.path.exists(self.outputdir): os.mkdir(self.outputdir)
-
-        # Spread particles/sediments using a Gauss shape in the upper 2 meters
-        low_depth, mean_depth, high_depth = -2, -0.5, 0
-        stdev = (low_depth - mean_depth) / 3.
-        z_levels = []
-        while len(z_levels) < self.confobj.releaseParticles:
-            sample = random.gauss(self.confobj.mean_depth, stdev)
-            if low_depth <= sample < high_depth:
-                z_levels.append(sample)
-            else:
-                z_levels.append(mean_depth)
-
-        print('Seeding {} elements within a radius of {} m (depths {} to {} m)'.format(self.confobj.releaseParticles,
-                                                                                       self.confobj.releaseRadius,
-                                                                                       np.min(z_levels),
-                                                                                       np.max(z_levels)))
-
-        print("Releasing {} sediments between {} and {}".format(self.confobj.species,
+        logging.debug("Releasing {} sediments between {} and {}".format(self.confobj.species,
                                                                 self.confobj.start_date,
                                                                 self.confobj.end_date))
         o.seed_elements(lon=self.confobj.st_lons,
@@ -92,9 +51,9 @@ class Sediment_Organizer:
                         cone=False,
                         time=[self.confobj.start_date, self.confobj.end_date],
                         terminal_velocity=self.confobj.sinkingvelocities[self.confobj.experiment],
-                        z=z_levels)
+                        z=self.init_release_depths)
 
-        print('Elements scheduled for {} : {}'.format(self.confobj.species, o.elements_scheduled))
+        logging.debug('Elements scheduled for {} : {}'.format(self.confobj.species, o.elements_scheduled))
 
         o.run(end_time=self.confobj.end_date,
               time_step=timedelta(minutes=30),
@@ -106,21 +65,16 @@ class Sediment_Organizer:
         start_time = time.time()
 
         experiments = [0]  # Used as index other places so have to run from 0---N
-        years = [2019]
 
-        for year in years:
-            self.confobj.start_date = datetime(year, 7, 1, 12, 0, 0)
-            self.confobj.end_date = datetime(year, 7, 7, 12, 0, 0)
-            logging.debug(
-                "Running experiment for period {} to {}".format(self.confobj.start_date.year, self.confobj.end_date))
+        for year in range(self.confobj.start_date.year,self.confobj.end_date.year,1):
+            logging.debug("Running experiment for period {} to {}".\
+                          format(self.confobj.start_date.year, self.confobj.end_date))
 
             for self.confobj.select_sinking_velocity in self.confobj.sinkingvelocities:
-                self.create_output_filenames(self.confobj)
-
-                self.create_and_run_simulation(self.confobj)
+                self.confobj.create_output_filenames()
+                self.create_and_run_simulation()
 
         logging.debug("---  It took %s seconds to run the script ---" % (time.time() - start_time))
-
 
 def main():
     run = Sediment_Organizer()
