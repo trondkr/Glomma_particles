@@ -21,6 +21,7 @@ class MartiniConf():
     def __init__(self):
         print('\n--------------------------\n')
         print('Started ' + time.ctime(time.time()))
+        self.debug=True
 
         self.paths = None
         self.mymap = None

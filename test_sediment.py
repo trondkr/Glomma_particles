@@ -2,6 +2,7 @@ import unittest
 import run_sedimentdrift
 from datetime import datetime
 from config_sedimentdrift import MartiniConf
+from sedimentdrift import SedimentDrift
 
 class TestGLOMMA_init(unittest.TestCase):
 
@@ -14,6 +15,18 @@ class TestGLOMMA_init(unittest.TestCase):
 
     def tearDown(self):
         super(TestGLOMMA_init, self).tearDown()
+
+class TestSedimentDrift(TestGLOMMA_init):
+
+    def test_setup_returns_sediment_object(self):
+        o = self.sediment_organizer.setup_and_config_sediment_module()
+        self.assertIsInstance(o, SedimentDrift)
+
+    def test_setup_correct_configured(self):
+        o = self.sediment_organizer.setup_and_config_sediment_module()
+        conf = o.get_config('vertical_mixing:update_terminal_velocity')
+        self.assertIsNotNone(conf)
+
 
 class TestInit(TestGLOMMA_init):
 

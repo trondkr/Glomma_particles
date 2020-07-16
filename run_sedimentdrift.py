@@ -8,6 +8,7 @@ import numpy as np
 from opendrift.readers import reader_ROMS_native
 
 from config_sedimentdrift import MartiniConf
+from sedimentdrift import SedimentDrift
 
 __author__ = 'Trond Kristiansen'
 __email__ = 'me (at) trondkristiansen.com'
@@ -45,27 +46,25 @@ class Sediment_Organizer:
         self.confobj.outputFilename = outputFilename
         logging.debug("Result files will be stored as:\nnetCDF=> {}".format(self.confobj.outputFilename))
 
-    def create_and_run_simulation(self):
+    # Setup the sediment object and configuration
+    def setup_and_config_sediment_module(self) -> SedimentDrift:
         # Setup a new simulation
-        o = SedimentDrift(loglevel=0)  # Set loglevel to 0 for debug information
-
-        if not os.path.exists(self.outputdir): os.mkdir(self.outputdir)
-
-        reader_physics = reader_ROMS_native.Reader(self.confobj.basedir + self.confobj.pattern)
-        o.add_reader([reader_physics])
-
-        #######################
-        # Adjusting configuration
-        #######################
+        o = SedimentDrift(loglevel=self.confobj.debug)  # Set loglevel to 0 for debug information
         o.set_config('drift:vertical_mixing', True)
         o.set_config('drift:vertical_advection', True)
         o.set_config('vertical_mixing:diffusivitymodel', 'gls_tke')
         o.set_config('vertical_mixing:TSprofiles', True)
-
         o.set_config('drift:scheme', 'runge-kutta4')
         o.set_config('drift:lift_to_seafloor', True)
-
         o.set_config('vertical_mixing:update_terminal_velocity', True)
+        return o
+
+    def create_and_run_simulation(self):
+        o = self.setup_and_config_sediment_module()
+        reader_physics = reader_ROMS_native.Reader(self.confobj.basedir + self.confobj.pattern)
+        o.add_reader([reader_physics])
+
+        if not os.path.exists(self.outputdir): os.mkdir(self.outputdir)
 
         # Spread particles/sediments using a Gauss shape in the upper 2 meters
         low_depth, mean_depth, high_depth = -2, -0.5, 0
