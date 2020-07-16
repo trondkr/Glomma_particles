@@ -1,17 +1,13 @@
-from datetime import datetime, timedelta
-import numpy as np
-from opendrift.readers import reader_basemap_landmask
-from opendrift.readers import reader_ROMS_native
-from opendrift.models.plastdrift_bekkelaget import PlastDrift
 import logging
 import os
-from netCDF4 import Dataset, date2num, num2date
-from numpy.random import RandomState
-import matplotlib.pyplot as plt
-import time
-import config_bekkelaget as confm
 import random
-import logging
+import time
+from datetime import datetime, timedelta
+
+import numpy as np
+from opendrift.readers import reader_ROMS_native
+
+from config_sedimentdrift import MartiniConf
 
 __author__ = 'Trond Kristiansen'
 __email__ = 'me (at) trondkristiansen.com'
@@ -24,37 +20,27 @@ __status__ = "Development, modified on 29.06.2020"
 class Sediment_Organizer:
 
     def __init__(self):
-        self.confobj = confm.martini_conf()
+        print("Inside init for sediment organizer")
+        self.confobj: MartiniConf = MartiniConf()
 
-    def create_output_filenames(self, startDate=None, endDate=None) -> object:
+    def create_output_filenames(self):
+        print("inside", self.confobj.start_date)
+        print(self.confobj.end_date)
+        start_date_str: str = '{}{}{}'.format(str(self.confobj.start_date.year),
+                                              str(self.confobj.start_date.month).zfill(2),
+                                              str(self.confobj.start_date.day).zfill(2))
 
-        if self.confobj.startdate.day < 10:
-            startDate += '0%s' % self.confobj.startdate.day
-        else:
-            startDate += '%s' % self.confobj.startdate.day
+        end_date_str: str = '{}{}{}'.format(str(self.confobj.end_date.year),
+                                            str(self.confobj.end_date.month).zfill(2),
+                                            str(self.confobj.end_date.day).zfill(2))
+        print(start_date_str)
+        print(end_date_str)
+        print(self.confobj.species)
+        print(self.confobj.outputdir)
 
-        if self.confobj.startdate.month < 10:
-            startDate += '0%s' % self.confobj.startdate.month
-        else:
-            startDate += '%s' % self.confobj.startdate.month
-
-        startDate += '%s' % self.confobj.startdate.year
-
-        if self.confobj.enddate.day < 10:
-            endDate += '0%s' % self.confobj.enddate.day
-        else:
-            endDate += '%s' % self.confobj.enddate.day
-
-        if self.confobj.enddate.month < 10:
-            endDate += '0%s' % self.confobj.enddate.month
-        else:
-            endDate += '%s' % self.confobj.enddate.month
-
-        endDate += '%s' % self.confobj.enddate.year
-
-        outputFilename = self.confobj.outputdir + '/Glomma_{}_drift_{}_to_{}.nc'.format(self.confobj.species,
-                                                                                        startDate,
-                                                                                        endDate)
+        outputFilename = self.confobj.outputdir + 'Glomma_{}_drift_{}_to_{}.nc'.format(self.confobj.species,
+                                                                                       start_date_str,
+                                                                                       end_date_str)
 
         if os.path.exists(outputFilename):
             os.remove(outputFilename)
@@ -64,6 +50,8 @@ class Sediment_Organizer:
     def create_and_run_simulation(self):
         # Setup a new simulation
         o = SedimentDrift(loglevel=0)  # Set loglevel to 0 for debug information
+
+        if not os.path.exists(self.outputdir): os.mkdir(self.outputdir)
 
         reader_physics = reader_ROMS_native.Reader(self.confobj.basedir + self.confobj.pattern)
         o.add_reader([reader_physics])
@@ -98,20 +86,20 @@ class Sediment_Organizer:
                                                                                        np.max(z_levels)))
 
         print("Releasing {} sediments between {} and {}".format(self.confobj.species,
-                                                                self.confobj.startdate,
-                                                                self.confobj.enddate))
+                                                                self.confobj.start_date,
+                                                                self.confobj.end_date))
         o.seed_elements(lon=self.confobj.st_lons,
                         lat=self.confobj.st_lats,
                         number=self.confobj.releaseParticles,
                         radius=[self.confobj.releaseRadius],
                         cone=False,
-                        time=[self.confobj.startdate, self.confobj.enddate],
+                        time=[self.confobj.start_date, self.confobj.end_date],
                         terminal_velocity=self.confobj.sinkingvelocities[self.confobj.experiment],
                         z=z_levels)
 
         print('Elements scheduled for {} : {}'.format(self.confobj.species, o.elements_scheduled))
 
-        o.run(end_time=self.confobj.enddate,
+        o.run(end_time=self.confobj.end_date,
               time_step=timedelta(minutes=30),
               time_step_output=timedelta(minutes=30),
               outfile=self.confobj.outputFilename,
@@ -124,13 +112,12 @@ class Sediment_Organizer:
         years = [2019]
 
         for year in years:
-            self.confobj.startdate = datetime(year, 7, 1, 12, 0, 0)
-            self.confobj.enddate = datetime(year, 7, 7, 12, 0, 0)
+            self.confobj.start_date = datetime(year, 7, 1, 12, 0, 0)
+            self.confobj.end_date = datetime(year, 7, 7, 12, 0, 0)
             logging.debug(
-                "Running experiment for period {} to {}".format(self.confobj.startdate.year, self.confobj.enddate))
+                "Running experiment for period {} to {}".format(self.confobj.start_date.year, self.confobj.end_date))
 
             for self.confobj.select_sinking_velocity in self.confobj.sinkingvelocities:
-
                 self.create_output_filenames(self.confobj)
 
                 self.create_and_run_simulation(self.confobj)

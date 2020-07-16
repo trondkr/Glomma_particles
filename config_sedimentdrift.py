@@ -4,6 +4,7 @@
 import time, calendar
 from datetime import datetime, timedelta
 import os
+import numpy as np
 
 __author__ = 'Trond Kristiansen'
 __email__ = 'Trond.Kristiansen (at) niva.no'
@@ -15,14 +16,29 @@ __status__ = "Development, modified on 29.06.2020"
 """
 https://www.fondriest.com/environmental-measurements/parameters/hydrology/sediment-transport-deposition/
 """
-class martini_conf():
+class MartiniConf():
 
-    def user_defined_inits(self):
+    def __init__(self):
+        print('\n--------------------------\n')
+        print('Started ' + time.ctime(time.time()))
+
+        self.paths = None
+        self.mymap = None
+        self.ax = None
+        self.deltaX = None
+        self.deltaY = None
+        self.dx = None
+        self.dy = None
+        self.cmap = None
+        self.outputFilename = None
+        self.results_startdate = None
+        self.results_enddate = None
+        self.start_date:datetime=datetime(2000,1,1)
+        self.end_date:datetime=datetime(2002,1,1)
+        self.outputdir = None
         self.verticalBehavior = False
-        self.basedir = '/cluster/home/knutfd/'
+        self.basedir = '/cluster/projects/nn9297k/Glomma_particles/'
         self.outputdir = self.basedir + 'output/'
-        if not os.path.exists(self.outoutdir): os.mkdir(self.outoutdir)
-
         self.pattern = 'martini_800m_his_*'
         self.species = 'clay'
         self.plot_type = 'scatter'
@@ -53,24 +69,3 @@ class martini_conf():
         self.probxmax = 10.78
         self.probymin = 59.87
         self.probymax = 59.90
-
-    def __init__(self):
-        print('\n--------------------------\n')
-        print('Started ' + time.ctime(time.time()))
-
-        self.user_defined_inits()
-
-        self.paths = None
-        self.mymap = None
-        self.ax = None
-        self.deltaX = None
-        self.deltaY = None
-        self.dx = None
-        self.dy = None
-        self.cmap = None
-        self.outputFilename = None
-        self.results_startdate = None
-        self.results_enddate = None
-        self.startdate = None
-        self.enddate = None
-        self.outputdir = None
