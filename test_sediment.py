@@ -39,8 +39,11 @@ class TestSedimentDrift(TestGLOMMA_init):
     # done in Glomma June 2020. Particle sizes ranged from 0.0002 - 0.2 mm
     def test_terminal_velocity_calculation(self):
 
-        diameters_p, densities_p = self.sediment_organizer.confobj.generate_range_of_diameters_and_densities(number=10)
-        print(diameters_p, densities_p)
+        diameters_p = self.sediment_organizer.confobj.generate_gaussian_distribution(0.002e-3, 0.2e-3, 0.02e-3, 0.002e-3,
+                                                             self.number_of_particles)
+        densities_p = self.sediment_organizer.confobj.generate_gaussian_distribution(1.0, 2.0, 1.5, 0.5,
+                                                             self.number_of_particles)
+
         T0 = np.ones(len(diameters_p))*10.0
         S0 = np.ones(len(diameters_p))*27.0
         term_vel = self.sediment_drift.calc_terminal_velocity(densities_p, diameters_p, T0, S0)

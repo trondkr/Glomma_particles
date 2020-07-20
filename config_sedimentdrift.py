@@ -28,39 +28,30 @@ class MartiniConf():
         print('\n--------------------------\n')
         print('Started ' + time.ctime(time.time()))
         self.debug = True
-
-        self.paths = None
-        self.mymap = None
-        self.ax = None
-        self.deltaX = None
-        self.deltaY = None
-        self.dx = None
-        self.dy = None
-        self.cmap = None
-        self.outputFilename = None
-        self.results_startdate = None
-        self.results_enddate = None
-        self.start_date: datetime = datetime(2018, 1, 1)
-        self.end_date: datetime = datetime(2018, 2, 1)
+        self.start_date: datetime = datetime(2019, 5, 1)
+        self.end_date: datetime = datetime(2019, 5, 8)
         self.outputdir = None
         self.verticalBehavior = False
         self.basedir = '/cluster/projects/nn9297k/Glomma_particles/'
         self.datadir = "/cluster/projects/nn9197k/kaihc/Run/"
         self.outputdir = self.basedir + 'output/'
-        self.pattern = 'martini_800m_his_*'
+        self.pattern = 'martini_800m_his_085*'
         self.species = 'clay'
-        self.plot_type = 'scatter'
-        self.cmapname = 'RdYlBu_r'
         self.selectyear = 'all'
 
         # Glomma - seed locations
         self.st_lons = [10.962920]
         self.st_lats = [59.169194]
-        self.releaseParticles = 10000
+        self.number_of_particles = 10000
         self.releaseRadius = 50
-        self.diameters = np.arange(0.0002, 0.2, 0.01)  # diameter in mm
-        self.densities = np.arange(1.2, 1.7, 0.1)
+        # diameter in meter, densities in kg/m3
+        self.diameters = self.generate_gaussian_distribution(0.002e-3, 0.2e-3, 0.02e-3, 0.002e-3, self.number_of_particles)
+        self.densities = self.generate_gaussian_distribution(1.0, 2.0, 1.5, 0.5, self.number_of_particles)
         self.sed_crit = 0.1
+
+        self.outputFilename = None
+        self.results_startdate = None
+        self.results_enddate = None
 
     def setup_plot_conf(self):
         # For plotting
@@ -76,24 +67,23 @@ class MartiniConf():
         self.probymin = 59.87
         self.probymax = 59.90
 
-    def generate_range_of_diameters_and_densities(self, number):
-        diameter_start = 0.0002
-        density_start = 1.0
-        diameter_stop = 0.2
-        density_stop = 2.0
-        diameter_mean = 0.02
-        density_mean = 1.5
-        diameter_std = 0.002
-        density_std = 0.5
+        self.plot_type = 'scatter'
+        self.cmapname = 'RdYlBu_r'
+
+        self.paths = None
+        self.mymap = None
+        self.ax = None
+        self.deltaX = None
+        self.deltaY = None
+        self.dx = None
+        self.dy = None
+        self.cmap = None
+
+    def generate_gaussian_distribution(self, part_min, part_max, part_mean, part_std, number):
         # Diameters in meter
-        diameters = np.asarray(
-            [max(diameter_start, min(diameter_stop, random.gauss(diameter_mean, diameter_std))) / 1000. for i in
+        return np.asarray(
+            [max(part_max, min(part_min, random.gauss(part_mean, part_std))) / 1000. for i in
              range(number)])
-        # Densities in kg/m3
-        densities = np.asarray(
-            [max(density_start, min(density_stop, random.gauss(density_mean, density_std))) * 1000. for i in
-             range(number)])
-        return diameters, densities
 
     def create_output_filenames(self):
         start_date_str: str = '{}{}{}'.format(str(self.start_date.year),

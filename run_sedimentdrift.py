@@ -40,6 +40,8 @@ class Sediment_Organizer:
 
     def create_and_run_simulation(self):
         o = self.setup_and_config_sediment_module()
+        diameters_p, densities_p = self.sediment_organizer.confobj.generate_range_of_diameters_and_densities(number=10)
+
         reader_physics = reader_ROMS_native.Reader(self.confobj.datadir + self.confobj.pattern)
         o.add_reader([reader_physics])
 
