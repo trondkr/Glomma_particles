@@ -112,15 +112,15 @@ class MartiniConf():
         low_depth, mean_depth, high_depth = -2, -0.5, 0
         stdev = (low_depth - mean_depth) / 3.
         z_levels = []
-        while len(z_levels) < self.releaseParticles:
+        while len(z_levels) < self.number_of_particles:
             sample = random.gauss(self.mean_depth, stdev)
             if low_depth <= sample < high_depth:
                 z_levels.append(sample)
             else:
                 z_levels.append(mean_depth)
 
-        print('Seeding {} elements within a radius of {} m (depths {} to {} m)'.format(self.confobj.releaseParticles,
-                                                                                       self.confobj.releaseRadius,
+        print('Seeding {} elements within a radius of {} m (depths {} to {} m)'.format(self.number_of_particles,
+                                                                                       self.number_of_particles,
                                                                                        np.min(z_levels),
                                                                                        np.max(z_levels)))
         return z_levels
