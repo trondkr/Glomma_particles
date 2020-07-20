@@ -4,3 +4,5 @@
 LISST/*
 *.idea/**
 .ipynb_checkpoints/**
+output/*
+*.nc
