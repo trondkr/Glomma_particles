@@ -49,10 +49,10 @@ class Sediment_Organizer:
         o.seed_elements(lon=self.confobj.st_lons,
                         lat=self.confobj.st_lats,
                         number=self.confobj.number_of_particles,
-                        radius=[self.confobj.releaseRadius],
+                        radius=[self.confobj.release_radius],
                         cone=False,
                         time=[self.confobj.start_date, self.confobj.end_date],
-                        z=self.init_release_depths)
+                        z=self.confobj.init_release_depths)
 
         logging.debug('Elements scheduled for {} : {}'.format(self.confobj.species, o.elements_scheduled))
 
