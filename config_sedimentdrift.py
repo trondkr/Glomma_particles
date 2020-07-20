@@ -113,7 +113,7 @@ class MartiniConf():
         stdev = (low_depth - mean_depth) / 3.
         z_levels = []
         while len(z_levels) < self.number_of_particles:
-            sample = random.gauss(self.mean_depth, stdev)
+            sample = random.gauss(mean_depth, stdev)
             if low_depth <= sample < high_depth:
                 z_levels.append(sample)
             else:
