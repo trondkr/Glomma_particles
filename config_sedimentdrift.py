@@ -109,7 +109,7 @@ class MartiniConf():
         if not os.path.exists(self.outputdir): os.mkdir(self.outputdir)
 
         # Spread particles/sediments using a Gauss shape in the upper surface
-        low_depth, mean_depth, high_depth = -2, -0.5, 0
+        low_depth, mean_depth, high_depth = 2, 0.5, 0
         stdev = (low_depth - mean_depth) / 3.
         z_levels = []
         while len(z_levels) < self.number_of_particles:

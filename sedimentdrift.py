@@ -151,7 +151,7 @@ class SedimentDrift(OceanDrift):
             self.update_terminal_velocity()
 
         self.advect_ocean_current()
-
+        print("UODATING !!")
         self.vertical_advection()
 
         self.advect_wind()  # Wind shear in upper 10cm of ocean
