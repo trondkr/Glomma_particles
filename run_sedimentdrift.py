@@ -1,9 +1,7 @@
 import logging
-import os
-import random
 import time
 from datetime import datetime, timedelta
-import numpy as np
+
 from opendrift.readers import reader_ROMS_native
 
 from config_sedimentdrift import MartiniConf
@@ -12,9 +10,9 @@ from sedimentdrift import SedimentDrift
 __author__ = 'Trond Kristiansen'
 __email__ = 'me (at) trondkristiansen.com'
 __created__ = datetime(2020, 6, 29)
-__modified__ = datetime(2020, 6, 29)
+__modified__ = datetime(2020, 7, 20)
 __version__ = "1.0"
-__status__ = "Development, modified on 29.06.2020"
+__status__ = "Development, modified on 29.06.2020, 20.07.2020"
 
 
 class Sediment_Organizer:
@@ -34,6 +32,10 @@ class Sediment_Organizer:
         o.set_config('drift:scheme', 'runge-kutta4')
         o.set_config('drift:lift_to_seafloor', True)
         o.set_config('vertical_mixing:update_terminal_velocity', True)
+        o.set_config('drift:current_uncertainty', .2)
+        o.set_config('drift:wind_uncertainty', 2)
+        o.set_config('vertical_mixing:diffusivitymodel', 'windspeed_Large1994')
+
         return o
 
     def create_and_run_simulation(self):
@@ -42,8 +44,8 @@ class Sediment_Organizer:
         o.add_reader([reader_physics])
 
         logging.debug("Releasing {} sediments between {} and {}".format(self.confobj.species,
-                                                                self.confobj.start_date,
-                                                                self.confobj.end_date))
+                                                                        self.confobj.start_date,
+                                                                        self.confobj.end_date))
         o.seed_elements(lon=self.confobj.st_lons,
                         lat=self.confobj.st_lats,
                         number=self.confobj.releaseParticles,
@@ -64,17 +66,14 @@ class Sediment_Organizer:
     def start_simulations(self):
         start_time = time.time()
 
-        experiments = [0]  # Used as index other places so have to run from 0---N
+        logging.debug("Running experiment for period {} to {}". \
+                      format(self.confobj.start_date.year, self.confobj.end_date))
 
-        for year in range(self.confobj.start_date.year,self.confobj.end_date.year,1):
-            logging.debug("Running experiment for period {} to {}".\
-                          format(self.confobj.start_date.year, self.confobj.end_date))
-
-            for self.confobj.select_sinking_velocity in self.confobj.sinkingvelocities:
-                self.confobj.create_output_filenames()
-                self.create_and_run_simulation()
+        self.confobj.create_output_filenames()
+        self.create_and_run_simulation()
 
         logging.debug("---  It took %s seconds to run the script ---" % (time.time() - start_time))
+
 
 def main():
     run = Sediment_Organizer()
