@@ -52,7 +52,7 @@ class Sediment_Organizer:
                         radius=[self.confobj.release_radius],
                         cone=False,
                         time=[self.confobj.start_date, self.confobj.end_date],
-                        z=self.confobj.init_release_depths)
+                        z=self.confobj.init_release_depths())
 
         logging.debug('Elements scheduled for {} : {}'.format(self.confobj.species, o.elements_scheduled))
 
