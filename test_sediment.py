@@ -40,9 +40,9 @@ class TestSedimentDrift(TestGLOMMA_init):
     def test_terminal_velocity_calculation(self):
 
         diameters_p = self.sediment_organizer.confobj.generate_gaussian_distribution(0.002e-3, 0.2e-3, 0.02e-3, 0.002e-3,
-                                                             self.number_of_particles)
+                                                             self.sediment_organizer.confobj.number_of_particles)
         densities_p = self.sediment_organizer.confobj.generate_gaussian_distribution(1.0, 2.0, 1.5, 0.5,
-                                                             self.number_of_particles)
+                                                             self.sediment_organizer.confobj.number_of_particles)
 
         T0 = np.ones(len(diameters_p))*10.0
         S0 = np.ones(len(diameters_p))*27.0
