@@ -49,7 +49,10 @@ class SedimentDrift(OceanDrift):
     ElementType = SedimentElement
 
     required_variables = [
-        'x_sea_water_velocity', 'y_sea_water_velocity',
+        'x_sea_water_velocity',
+        'y_sea_water_velocity',
+        'sea_water_temperature',
+        'sea_water_salinity',
         'upward_sea_water_velocity',
         'x_wind', 'y_wind',
         'sea_surface_wave_stokes_drift_x_velocity',
@@ -64,6 +67,8 @@ class SedimentDrift(OceanDrift):
     fallback_values = {
         'x_sea_water_velocity': 0, 'y_sea_water_velocity': 0,
         'upward_sea_water_velocity': 0,
+        'sea_water_temperature': 10,
+        'sea_water_salinity': 35.0,
         'x_wind': 0, 'y_wind': 0,
         'sea_surface_wave_stokes_drift_x_velocity': 0,
         'sea_surface_wave_stokes_drift_y_velocity': 0,
@@ -117,7 +122,6 @@ class SedimentDrift(OceanDrift):
         else:
             S0 = Sprofiles[upper, range(Sprofiles.shape[1])] * weight_upper + Sprofiles[
                 lower, range(Sprofiles.shape[1])] * (1 - weight_upper)
-
 
         self.elements.terminal_velocity = \
             self.calc_terminal_velocity(self.elements.density, self.elements.diameter, T0, S0)
