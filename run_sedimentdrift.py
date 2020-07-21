@@ -28,7 +28,7 @@ class Sediment_Organizer:
         o.set_config('drift:vertical_mixing', True)
         o.set_config('drift:vertical_advection', True)
         o.set_config('vertical_mixing:diffusivitymodel', 'gls_tke')
-        o.set_config('vertical_mixing:TSprofiles', True)
+        o.set_config('vertical_mixing:TSprofiles', False)
         o.set_config('drift:scheme', 'runge-kutta4')
         o.set_config('drift:lift_to_seafloor', True)
         o.set_config('vertical_mixing:update_terminal_velocity', True)
