@@ -112,16 +112,16 @@ class SedimentDrift(OceanDrift):
 
         # do interpolation of temp, salt if profiles were passed into this function,
         # if not, use reader by calling self.environment
-        if Tprofiles == None:
-            T0 = self.environment.sea_water_temperature
-        else:
-            T0 = Tprofiles[upper, range(Tprofiles.shape[1])] * weight_upper + Tprofiles[
-                lower, range(Tprofiles.shape[1])] * (1 - weight_upper)
-        if Sprofiles == None:
-            S0 = self.environment.sea_water_salinity
-        else:
-            S0 = Sprofiles[upper, range(Sprofiles.shape[1])] * weight_upper + Sprofiles[
-                lower, range(Sprofiles.shape[1])] * (1 - weight_upper)
+      #  if Tprofiles == None:
+        T0 = self.environment.sea_water_temperature
+       # else:
+       #     T0 = Tprofiles[upper, range(Tprofiles.shape[1])] * weight_upper + Tprofiles[
+       #         lower, range(Tprofiles.shape[1])] * (1 - weight_upper)
+       # if Sprofiles == None:
+        S0 = self.environment.sea_water_salinity
+       # else:
+       #     S0 = Sprofiles[upper, range(Sprofiles.shape[1])] * weight_upper + Sprofiles[
+       #         lower, range(Sprofiles.shape[1])] * (1 - weight_upper)
 
         self.elements.terminal_velocity = \
             self.calc_terminal_velocity(self.elements.density, self.elements.diameter, T0, S0)
