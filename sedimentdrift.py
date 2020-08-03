@@ -125,7 +125,7 @@ class SedimentDrift(OceanDrift):
 
         self.elements.terminal_velocity = \
             self.calc_terminal_velocity(self.elements.density, self.elements.diameter, T0, S0)
-        print(self.elements.terminal_velocity)
+        print("terminal velocity", self.elements.terminal_velocity)
 
     # Separate the actual calculation so that we can use unit-testing
     # Returns terminal velocity in m/s
@@ -150,7 +150,7 @@ class SedimentDrift(OceanDrift):
         # possibility of not moving settled elements, until
         # they are re-suspended. May then need to send a boolean
         # array to advection methods below
-
+        print("self.get_config('vertical_mixing:update_terminal_velocity'):",self.get_config('vertical_mixing:update_terminal_velocity'))
         if self.get_config('vertical_mixing:update_terminal_velocity') is True:
 
             self.update_terminal_velocity()
@@ -178,9 +178,9 @@ class SedimentDrift(OceanDrift):
 
     def resuspension(self):
         """Resuspending elements if current speed > .5 m/s"""
-        resuspending = np.logical_and(self.current_speed() > .5, self.elements.moving == 0)
+        resuspending = np.logical_and(self.current_speed() > .1, self.elements.moving == 0)
         if np.sum(resuspending) > 0:
             # Allow moving again
             self.elements.moving[resuspending] = 1
             # Suspend 1 cm above seafloor
-            self.elements.z[resuspending] = self.elements.z[resuspending] + .01
+            self.elements.z[resuspending] = self.elements.z[resuspending] + .10 # 10 cm
