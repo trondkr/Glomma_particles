@@ -48,6 +48,8 @@ class MartiniConf():
         self.diameters = self.generate_gaussian_distribution(0.002e-3, 0.2e-3, 0.005e-3, 0.02e-3, self.number_of_particles)
         self.densities = self.generate_gaussian_distribution(1.0, 2.0, 1.1, 0.2, self.number_of_particles)
         self.sed_crit = 0.1
+        print("self.diameters ",self.diameters )
+        print("self.densities ", self.densities)
 
         self.outputFilename = None
         self.results_startdate = None
