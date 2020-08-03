@@ -150,7 +150,6 @@ class SedimentDrift(OceanDrift):
         # possibility of not moving settled elements, until
         # they are re-suspended. May then need to send a boolean
         # array to advection methods below
-        print("self.get_config('vertical_mixing:update_terminal_velocity'):",self.get_config('vertical_mixing:update_terminal_velocity'))
         if self.get_config('vertical_mixing:update_terminal_velocity') is True:
 
             self.update_terminal_velocity()
@@ -166,7 +165,7 @@ class SedimentDrift(OceanDrift):
         self.vertical_mixing()  # Including buoyancy and settling
 
         self.resuspension()
-
+        print("self.elements.z",self.elements.z)
     def bottom_interaction(self, seafloor_depth):
         """Sub method of vertical_mixing, determines settling"""
 
