@@ -42,8 +42,8 @@ class MartiniConf():
         # Glomma - seed locations
         self.st_lons = [10.962920]
         self.st_lats = [59.169194]
-        self.number_of_particles = 10000
-        self.release_radius = 50
+        self.number_of_particles = 1000
+        self.release_radius = 3
         # diameter in meter, densities in kg/m3
         self.diameters = self.generate_gaussian_distribution(0.002e-3, 0.2e-3, 0.02e-3, 0.002e-3, self.number_of_particles)
         self.densities = self.generate_gaussian_distribution(1.0, 2.0, 1.5, 0.5, self.number_of_particles)

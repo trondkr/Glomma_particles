@@ -125,6 +125,7 @@ class SedimentDrift(OceanDrift):
 
         self.elements.terminal_velocity = \
             self.calc_terminal_velocity(self.elements.density, self.elements.diameter, T0, S0)
+        print(self.elements.terminal_velocity)
 
     # Separate the actual calculation so that we can use unit-testing
     # Returns terminal velocity in m/s
@@ -133,7 +134,6 @@ class SedimentDrift(OceanDrift):
 
         # The density difference between a clay/sand particle and the ambient water
         dr = density_w - density_p
-        print(dr)
 
         # water viscosity
         dynamic_viscosity = 0.001 * (1.7915 - 0.0538 * T0 + 0.007 * (T0 ** (2.0)) - 0.0023 * S0)
@@ -148,14 +148,15 @@ class SedimentDrift(OceanDrift):
 
         # Advecting here all elements, but want to soon add
         # possibility of not moving settled elements, until
-        # they are resuspended. May then need to send a boolean
+        # they are re-suspended. May then need to send a boolean
         # array to advection methods below
 
         if self.get_config('vertical_mixing:update_terminal_velocity') is True:
+
             self.update_terminal_velocity()
 
         self.advect_ocean_current()
-        print("UODATING !!")
+
         self.vertical_advection()
 
         self.advect_wind()  # Wind shear in upper 10cm of ocean
@@ -163,6 +164,8 @@ class SedimentDrift(OceanDrift):
         self.stokes_drift()
 
         self.vertical_mixing()  # Including buoyancy and settling
+
+        self.resuspension()
 
     def bottom_interaction(self, seafloor_depth):
         """Sub method of vertical_mixing, determines settling"""
@@ -172,3 +175,12 @@ class SedimentDrift(OceanDrift):
         # as settled, for possibly later resuspension.
         self.deactivate_elements(self.elements.z < seafloor_depth + 1,
                                  reason='settled')
+
+    def resuspension(self):
+        """Resuspending elements if current speed > .5 m/s"""
+        resuspending = np.logical_and(self.current_speed() > .5, self.elements.moving == 0)
+        if np.sum(resuspending) > 0:
+            # Allow moving again
+            self.elements.moving[resuspending] = 1
+            # Suspend 1 cm above seafloor
+            self.elements.z[resuspending] = self.elements.z[resuspending] + .01
