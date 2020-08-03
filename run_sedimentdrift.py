@@ -31,7 +31,7 @@ class Sediment_Organizer:
         o.set_config('vertical_mixing:TSprofiles', False)
         o.set_config('drift:scheme', 'runge-kutta4')
         o.set_config('drift:lift_to_seafloor', True)
-        o.set_config('vertical_mixing:update_terminal_velocity', True)
+        o.set_config('vertical_mixing:update_terminal_velocity', False)
         o.set_config('drift:current_uncertainty', .2)
         o.set_config('drift:wind_uncertainty', 2)
         o.set_config('vertical_mixing:diffusivitymodel', 'windspeed_Large1994')
@@ -51,6 +51,7 @@ class Sediment_Organizer:
                         number=self.confobj.number_of_particles,
                         radius=[self.confobj.release_radius],
                         cone=False,
+                        terminal_velocity=-.01,
                         time=[self.confobj.start_date, self.confobj.end_date],
                         z=self.confobj.init_release_depths())
 
