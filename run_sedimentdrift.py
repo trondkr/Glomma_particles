@@ -64,7 +64,7 @@ class Sediment_Organizer:
               export_variables=['sea_floor_depth_below_sea_level', 'z', 'diameter', 'density','terminal_velocity'])
 
         o.animation(color='moving', fast=False, buffer=.01, filename="test.mp4")
-        o.animation_profile()
+        o.animation_profile(filename="test.png")
 
     def start_simulations(self):
         start_time = time.time()
