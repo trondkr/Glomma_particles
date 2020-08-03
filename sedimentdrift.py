@@ -177,8 +177,9 @@ class SedimentDrift(OceanDrift):
 
     def resuspension(self):
         """Resuspending elements if current speed > .5 m/s"""
-        resuspending = np.logical_and(self.current_speed() > .1, self.elements.moving == 0)
+        resuspending = np.logical_and(self.current_speed() > .25, self.elements.moving == 0)
         if np.sum(resuspending) > 0:
+            print("Resuspending {} particles".format(resuspending))
             # Allow moving again
             self.elements.moving[resuspending] = 1
             # Suspend 1 cm above seafloor
