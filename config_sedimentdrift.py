@@ -45,8 +45,8 @@ class MartiniConf():
         self.number_of_particles = 10000
         self.release_radius = 50
         # diameter in meter, densities in kg/m3
-        self.diameters = self.generate_gaussian_distribution(0.002e-3, 0.2e-3, 0.005e-3, 0.02e-3, self.number_of_particles)
-        self.densities = self.generate_gaussian_distribution(1.0, 2.0, 1.1, 0.2, self.number_of_particles)
+        self.diameters = self.generate_gaussian_distribution(0.05e-3, 0.01e-3/3.,self.number_of_particles)
+        self.densities = self.generate_gaussian_distribution(1500, 500/3.,self.number_of_particles)
         self.sed_crit = 0.1
         print("self.diameters ",self.diameters )
         print("self.densities ", self.densities)
@@ -81,11 +81,10 @@ class MartiniConf():
         self.dy = None
         self.cmap = None
 
-    def generate_gaussian_distribution(self, part_min, part_max, part_mean, part_std, number):
+    def generate_gaussian_distribution(self, part_mean, part_std, number):
         # Diameters in meter
         return np.asarray(
-            [max(part_max, min(part_min, random.gauss(part_mean, part_std))) / 1000. for i in
-             range(number)])
+            [random.gauss(part_mean, part_std) for i in range(number)])
 
     def create_output_filenames(self):
         start_date_str: str = '{}{}{}'.format(str(self.start_date.year),

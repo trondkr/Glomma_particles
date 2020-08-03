@@ -125,7 +125,7 @@ class SedimentDrift(OceanDrift):
 
         self.elements.terminal_velocity = \
             self.calc_terminal_velocity(self.elements.density, self.elements.diameter, T0, S0)
-        print("terminal velocity", self.elements.terminal_velocity)
+
 
     # Separate the actual calculation so that we can use unit-testing
     # Returns terminal velocity in m/s

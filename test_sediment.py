@@ -34,19 +34,31 @@ class TestSedimentDrift(TestGLOMMA_init):
         T=0.0; S=35.0
         self.assertAlmostEqual(1028.10, self.sediment_drift.sea_water_density(T, S), places=1)
 
+    def test_generate_densities_returns_correct_range(self):
+        min_d=1000
+        max_d=2000
+        mean_d=1500
+        std_d=500/3.
+
+        densities_p = self.sediment_organizer.confobj.generate_gaussian_distribution(mean_d, std_d,
+                                                                                     self.sediment_organizer.confobj.number_of_particles)
+        self.assertTrue(np.all(densities_p > 0))
+        self.assertTrue((min_d < np.mean(densities_p)) and (np.mean(densities_p) < max_d))
+
     # The values of densities for sand and
     # clay are taken from literature while the diameters are taken from observations
     # done in Glomma June 2020. Particle sizes ranged from 0.0002 - 0.2 mm
     def test_terminal_velocity_calculation(self):
 
-        diameters_p = self.sediment_organizer.confobj.generate_gaussian_distribution(0.002e-3, 0.2e-3, 0.02e-3, 0.002e-3,
+        diameters_p = self.sediment_organizer.confobj.generate_gaussian_distribution(0.05e-3, 0.01e-3/3.,
                                                              self.sediment_organizer.confobj.number_of_particles)
-        densities_p = self.sediment_organizer.confobj.generate_gaussian_distribution(1.0, 2.0, 1.5, 0.5,
+        densities_p = self.sediment_organizer.confobj.generate_gaussian_distribution(1500, 500/3.,
                                                              self.sediment_organizer.confobj.number_of_particles)
 
         T0 = np.ones(len(diameters_p))*10.0
         S0 = np.ones(len(diameters_p))*27.0
         term_vel = self.sediment_drift.calc_terminal_velocity(densities_p, diameters_p, T0, S0)
+
         self.assertIsNotNone(term_vel)
 
     def test_terminal_velocity_calculation_positive_buoyant_particles_rise(self):
