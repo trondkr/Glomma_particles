@@ -140,6 +140,8 @@ class SedimentDrift(OceanDrift):
         # ~0.0014 kg m-1 s-1
 
         g = 9.81  # ms-2
+        print("density_w",density_w)
+        print("velocity", (diameter_p ** 2 * dr * g) / (18. * dynamic_viscosity))
         return (diameter_p ** 2 * dr * g) / (18. * dynamic_viscosity)
 
     def update(self):
@@ -152,6 +154,7 @@ class SedimentDrift(OceanDrift):
         # array to advection methods below
         if self.get_config('vertical_mixing:update_terminal_velocity') is True:
 
+            print("UPDATE TERMINAL VEL")
             self.update_terminal_velocity()
 
         self.advect_ocean_current()
