@@ -140,8 +140,6 @@ class SedimentDrift(OceanDrift):
         # ~0.0014 kg m-1 s-1
 
         g = 9.81  # ms-2
-        print("density_w",density_w)
-        print("velocity", (diameter_p ** 2 * dr * g) / (18. * dynamic_viscosity))
         return (diameter_p ** 2 * dr * g) / (18. * dynamic_viscosity)
 
     def update(self):

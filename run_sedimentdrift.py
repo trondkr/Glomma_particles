@@ -64,8 +64,8 @@ class Sediment_Organizer:
               outfile=self.confobj.outputFilename,
               export_variables=['sea_floor_depth_below_sea_level', 'z', 'diameter', 'density','terminal_velocity'])
 
-        o.animation(color='moving', fast=False, buffer=.01, filename="test.mp4")
-        o.plot_property('z', filename="test.png")
+        o.animation(color='z', fast=False, buffer=.01, filename="test.mp4")
+       # o.plot_property('z', filename="test.png")
 
         o.animation_profile(filename="test.mp4")
 

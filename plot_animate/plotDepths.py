@@ -15,14 +15,14 @@ import time
 sed_crit = 0.1
 import glob
 
-def plt_part(df,p_part,col,axis,norm):
+def p_density(df,min_density,max_density,col,axis,norm):
 
     startdate = np.datetime64('2000-01-01T00:00:00')
+
+    d = df.where(df.density > max_density, drop = True)
+    df = d.where(d.density < min_density, drop=True)
     d=df
-   # d = df.where(df.z == 0, drop = True)
-  #  print(d)
     d['dif_depth'] =  d.sea_floor_depth_below_sea_level - d.z
-    print(d["z"][:])
     grp = d.groupby('trajectory')
     loop = [[utils.get_start_sed_depth(d), n, d] for n, d in grp if utils.get_start_sed_depth(d) != (None, None, None)]
 
@@ -49,10 +49,10 @@ def plt_part(df,p_part,col,axis,norm):
             axis.plot(x[-1],z[-1].values,'ko', markersize = 0.5,zorder = 10)                                
         
     if norm == True:
-        axis.set_title('Distibution of particles (type {}), normalized by time'.format(p_part))    
+        axis.set_title('Distibution of particles (type {}), normalized by time'.format(max_density))
         frmt = '%M-%d'
     elif norm == False: 
-        axis.set_title('Distibution of particles (type {})'.format(p_part))
+        axis.set_title('Distibution of particles (type {})'.format(max_density))
         frmt = '%b/%d'             
     axis.xaxis.set_major_formatter(mdates.DateFormatter(frmt))   
     axis.set_ylabel('Depth, m')
@@ -85,9 +85,9 @@ def call_make_plot_mf(paths,experiment,normalize):
    # df = df.where(df.status > -1, drop = True)
     df['z'] = df['z'] * -1.
 
-    sed_depths1 = plt_part(df,1,'#d65460',ax1,normalize) 
-    sed_depths2 = plt_part(df,2,'g',ax2,normalize)
-    sed_depths4 = plt_part(df,4,'#006080',ax3,normalize)        
+    sed_depths1 = p_density(df,0,1000,'#d65460',ax1,normalize)
+    sed_depths2 = p_density(df,1000,1200,'g',ax2,normalize)
+    sed_depths4 = p_density(df,1200,2000,'#006080',ax3,normalize)
 
     bins = np.arange(1,200,10)
 
