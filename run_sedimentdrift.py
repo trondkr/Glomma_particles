@@ -51,15 +51,14 @@ class Sediment_Organizer:
                         number=self.confobj.number_of_particles,
                         radius=[self.confobj.release_radius],
                         cone=False,
-                        terminal_velocity=-.01,
                         time=[self.confobj.start_date, self.confobj.end_date],
                         z=self.confobj.init_release_depths())
 
         logging.debug('Elements scheduled for {} : {}'.format(self.confobj.species, o.elements_scheduled))
 
         o.run(end_time=self.confobj.end_date,
-              time_step=timedelta(minutes=3),
-              time_step_output=timedelta(minutes=3),
+              time_step=timedelta(minutes=10),
+              time_step_output=timedelta(minutes=10),
               outfile=self.confobj.outputFilename,
               export_variables=['sea_floor_depth_below_sea_level', 'z', 'diameter', 'density','terminal_velocity'])
 

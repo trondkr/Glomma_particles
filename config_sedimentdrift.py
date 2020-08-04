@@ -46,7 +46,7 @@ class MartiniConf():
         self.release_radius = 50
         # diameter in meter, densities in kg/m3
         self.diameters = self.generate_gaussian_distribution(0.05e-3, 0.01e-3/3.,self.number_of_particles)
-        self.densities = self.generate_gaussian_distribution(1500, 500/3.,self.number_of_particles)
+        self.densities = self.generate_gaussian_distribution(1000, 500/3.,self.number_of_particles)
         self.sed_crit = 0.1
         print("self.diameters ",self.diameters )
         print("self.densities ", self.densities)
