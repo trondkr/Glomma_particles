@@ -51,6 +51,8 @@ class Sediment_Organizer:
                         number=self.confobj.number_of_particles,
                         radius=[self.confobj.release_radius],
                         cone=False,
+                        diameter=self.confobj.diameters,
+                        density=self.confobj.densities,
                         time=[self.confobj.start_date, self.confobj.end_date],
                         z=self.confobj.init_release_depths())
 
