@@ -17,7 +17,7 @@ def get_polygons():
 def get_paths(polygons = None,experiment = 1):
     if polygons is None:
         polygons = get_polygons()
-    elif polygons is 'All':
+    elif polygons == 'All':
         polygons = get_polygons()        
     
     startdate,enddate = ranges[experiment]
@@ -107,6 +107,3 @@ def get_df(path):
     df = xr.open_dataset(path)
     df['z'] = df['z'] * -1.
     return df.where(df.status > -1, drop = True)
-
-if __name__ is '__main__':
-    print (get_paths([1,2],experiment = 1))                

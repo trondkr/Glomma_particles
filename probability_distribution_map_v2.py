@@ -7,7 +7,7 @@ import glob
 import matplotlib
 from matplotlib.pyplot import cm 
 import matplotlib.pyplot as plt
-from mpl_toolkits.basemap import Basemap
+
 import pandas as pd
 import xarray as xr
 from datetime import datetime
@@ -15,81 +15,28 @@ from netCDF4 import Dataset, date2num,num2date
 from scipy.ndimage.filters import gaussian_filter
 from matplotlib.colors import BoundaryNorm
 from matplotlib.ticker import MaxNLocator
-import animateScatter
+import animate_scatter
 import time
 import utils
-import config_bekkelaget as confm
+import config_sedimentdrift as confm
 from fast_histogram import histogram2d
 import cmocean
 import laplacefilter
-import mpl_util
+import common_tools_drift
 from matplotlib.pyplot import cm 
-import drawCircleOfDistance
-import drawBathymetry
+import circle_of_distance
+import bathymetry
 from haversine import haversine, Unit
+import config_plot
 
-def createInputFilename(confobj):
-    startDate=''
-    if confobj.startdate.day<10:
-        startDate+='0%s'%(confobj.startdate.day)
-    else:
-        startDate+='%s'%(confobj.startdate.day)
- 
-    if confobj.startdate.month<10:
-        startDate+='0%s'%(confobj.startdate.month)
-    else:
-        startDate+='%s'%(confobj.startdate.month)
- 
-    startDate+='%s'%(confobj.startdate.year)
- 
-    endDate=''
-    if confobj.enddate.day<10:
-        endDate+='0%s'%(confobj.enddate.day)
-    else:
-        endDate+='%s'%(confobj.enddate.day)
- 
-    if confobj.enddate.month<10:
-        endDate+='0%s'%(confobj.enddate.month)
-    else:
-        endDate+='%s'%(confobj.enddate.month)
- 
-    endDate+='%s'%(confobj.enddate.year)
-  
-     
-    confobj.outputFilename='results/Bekkelaget_{}_drift_{}_to_{}_sinkspeed_{}_experiment_{}.nc'.format(confobj.species,
-    startDate,endDate,
-    abs(confobj.select_sinking_velocity),
-    confobj.experiment)
+class SedimentDistribution():
 
-    confobj.outputPlotFilename='figures/Bekkelaget_{}_drift_{}_to_{}_sinkspeed_{}_experiment_{}.png'.format(confobj.species,
-    startDate,endDate,
-    abs(confobj.select_sinking_velocity),
-    confobj.experiment)
-
-def get_paths(confobj):
-     
-    createInputFilename(confobj)
-    return confobj.outputFilename
- 
-def create_map(confobj):
-    plt.clf()
-    confobj.ax = plt.subplot(111)
-    mymap = Basemap(llcrnrlon=confobj.probxmin, llcrnrlat=confobj.probymin,
-                    urcrnrlon=confobj.probxmax, urcrnrlat=confobj.probymax,resolution='f', 
-                    projection='merc',area_thresh = 0.01)
- 
-  #  mymap.fillcontinents(color='lightgrey',zorder=6,alpha = 1.0)
-    mymap.drawcoastlines(linewidth=0.2, linestyle='solid', color='k', antialiased=1)
-    confobj.mymap=mymap
-   # addGADM(confobj)
-    drawBathymetry.addBathymetryROMS(confobj)
-
-   # drawBathymetry.addBathymetry(confobj)
-
-def addGADM(confobj):
-    gadmfile='/Users/trondkr/Dropbox/NIVA/Bekkelaget-microplast/gadm36_NOR_shp/gadm36_NOR_0'
-    info = confobj.mymap.readshapefile(gadmfile, 'comarques')
-    print(info)
+    def __init__(self):
+        self.output_filename = output_filename
+        self.config = config_plot.ConfigPlot()
+        self.config_sedimentdrift = config_sedimentdrift.MartiniConf()
+        bath = bathymetry.Bathymetry(self.config)
+        bath.add_bathymetry_from_etopo1()
 
 def find_depth(data):
     data['z'] = data['z'] * -1.
@@ -214,7 +161,7 @@ def make_map(confobj):
         #cs = confobj.mymap.contourf(Xd[:-1, :-1],Yd[:-1, :-1], density, cmap=confobj.cmap,levels = 50) #,edgecolors='face',linewidths=0.1) #,alpha=0.8)  #norm=norm,
 
         # LOKI distribution/seed area
-        X,Y = drawCircleOfDistance.createCircleAroundWithRadius(confobj.st_lats[0],confobj.st_lons[0],confobj.releaseRadius/1000.)
+        X,Y = circle_of_distance.createCircleAroundWithRadius(confobj.st_lats[0], confobj.st_lons[0], confobj.releaseRadius / 1000.)
         confobj.mymap.plot(X,Y,latlon=True,marker=None,color='y',linewidth=0.9)
 
         # LOKI main point
@@ -228,7 +175,7 @@ def make_map(confobj):
         confobj.mymap.scatter(x,y,alpha = 0.3,c = 'r',s = 1)
  
         # LOKI distribution/seed area
-        X,Y = drawCircleOfDistance.createCircleAroundWithRadius(confobj.st_lats[0],confobj.st_lons[0],confobj.releaseRadius/1000.)
+        X,Y = circle_of_distance.createCircleAroundWithRadius(confobj.st_lats[0], confobj.st_lons[0], confobj.releaseRadius / 1000.)
         confobj.mymap.plot(X,Y,latlon=True,marker=None,color='b',linewidth=0.2)
  
         # LOKI main point
@@ -238,29 +185,21 @@ def make_map(confobj):
 
     print("Printing figure to filee {} ".format(confobj.outputPlotFilename))
     plt.savefig(confobj.outputPlotFilename,format = 'png',dpi = 300)
- 
- 
- 
-def call_make_map(confobj):
-     
-    confobj.paths = get_paths(confobj) 
-    make_map(confobj)
- 
+
+def main():
+    infilenames = ["output/Glomma_clay_drift_20190501_to_20190510.nc"]
+    particle = "clay"
+
+    df = ct.get_pos_function_of_time(infilenames)
+
+    lats = df['lat'][:].values
+    lons = df['lon'][:].values
+    z = df['z'][:].values
+    time = df['time'][:].values
+    start_date = pd.to_datetime(time[0])
+    end_date = pd.to_datetime(time[-1])
+
+    output_filename = ct.create_animation_or_png_filename(start_date, end_date, particle, "mp4")
+
 if __name__ == "__main__":
-    start_time = time.time()
-    experiments = [0,1]
-    years=[2019]
-    for experiment in experiments:
-        confobj=confm.bekkelaget_conf(experiment)
-     
-        for year in years:
-            
-            confobj.startdate=datetime(year,7,1,12,0,0)
-            confobj.enddate=datetime(year,7,7,18,0,0)
-            marine_organism="microplast"
-    
-            for confobj.select_sinking_velocity in confobj.sinkingvelocities:
-                confobj.experiment=experiment
-                confobj.species=marine_organism
-                confobj.plot_type='heatmap'
-                call_make_map(confobj) 
+    make_map()

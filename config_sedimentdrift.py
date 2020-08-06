@@ -29,7 +29,7 @@ class MartiniConf():
         print('Started ' + time.ctime(time.time()))
         self.debug = True
         self.start_date: datetime = datetime(2019, 5, 1)
-        self.end_date: datetime = datetime(2019, 5, 10)
+        self.end_date: datetime = datetime(2019, 5, 20)
         self.outputdir = None
         self.verticalBehavior = False
         self.basedir = '/cluster/projects/nn9297k/Glomma_particles/'
@@ -45,41 +45,15 @@ class MartiniConf():
         self.number_of_particles = 1000
         self.release_radius = 50
         # diameter in meter, densities in kg/m3
+
         self.diameters = self.generate_gaussian_distribution(0.05e-3, 0.01e-3/3.,self.number_of_particles)
-        self.densities = self.generate_gaussian_distribution(1000, 500/3.,self.number_of_particles)
+        self.densities = self.generate_gaussian_distribution(1200, 500/3.,self.number_of_particles)
         self.sed_crit = 0.1
-        print("self.diameters ",self.diameters )
-        print("self.densities ", self.densities)
 
         self.outputFilename = None
         self.results_startdate = None
         self.results_enddate = None
 
-    def setup_plot_conf(self):
-        # For plotting
-        self.requiredResolution = 0.1  # km between bins
-        self.xmin = 10.475
-        self.xmax = 10.85
-        self.ymin = 59.6
-        self.ymax = 59.95
-        self.ROMSFILE = self.datadir + "martini_800m_his_0626.nc"
-
-        self.probxmin = 10.70
-        self.probxmax = 10.78
-        self.probymin = 59.87
-        self.probymax = 59.90
-
-        self.plot_type = 'scatter'
-        self.cmapname = 'RdYlBu_r'
-
-        self.paths = None
-        self.mymap = None
-        self.ax = None
-        self.deltaX = None
-        self.deltaY = None
-        self.dx = None
-        self.dy = None
-        self.cmap = None
 
     def generate_gaussian_distribution(self, part_mean, part_std, number):
         # Diameters in meter
