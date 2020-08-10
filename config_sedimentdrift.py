@@ -13,9 +13,9 @@ import numpy as np
 __author__ = 'Trond Kristiansen'
 __email__ = 'Trond.Kristiansen (at) niva.no'
 __created__ = datetime(2020, 6, 29)
-__modified__ = datetime(2020, 7, 16)
+__modified__ = datetime(2020, 8, 10)
 __version__ = "1.0"
-__status__ = "Development, modified on 29.06.2020, 16.07.2020"
+__status__ = "Development, modified on 29.06.2020, 16.07.2020, 10.08.2020"
 
 """
 https://www.fondriest.com/environmental-measurements/parameters/hydrology/sediment-transport-deposition/
@@ -28,27 +28,26 @@ class MartiniConf():
         print('\n--------------------------\n')
         print('Started ' + time.ctime(time.time()))
         self.debug = True
-        self.start_date: datetime = datetime(2019, 5, 1)
-        self.end_date: datetime = datetime(2019, 5, 20)
+        self.start_date: datetime = datetime(2019, 1, 1)
+        self.end_date: datetime = datetime(2019, 1, 5)
         self.outputdir = None
         self.verticalBehavior = False
         self.basedir = '/cluster/projects/nn9297k/Glomma_particles/'
         self.datadir = "/cluster/projects/nn9197k/kaihc/Run/"
         self.outputdir = self.basedir + 'output/'
-        self.pattern = 'martini_800m_his_085*'
+        self.pattern = 'martini_800m_his_'
         self.species = 'clay'
         self.selectyear = 'all'
 
         # Glomma - seed locations
         self.st_lons = [10.962920]
         self.st_lats = [59.169194]
-        self.number_of_particles = 1000
+        self.number_of_particles = 100000
         self.release_radius = 50
         # diameter in meter, densities in kg/m3
 
         self.diameters = self.generate_gaussian_distribution(0.05e-3, 0.01e-3/3.,self.number_of_particles)
-        self.densities = self.generate_gaussian_distribution(1200, 500/3.,self.number_of_particles)
-        self.sed_crit = 0.1
+        self.densities = self.generate_gaussian_distribution(1200, 1000/3.,self.number_of_particles)
 
         self.outputFilename = None
         self.results_startdate = None
@@ -84,7 +83,7 @@ class MartiniConf():
         if not os.path.exists(self.outputdir): os.mkdir(self.outputdir)
 
         # Spread particles/sediments using a Gauss shape in the upper surface
-        low_depth, mean_depth, high_depth = -2, -0.5, 0
+        low_depth, mean_depth, high_depth = -1, -0.1, 0
         stdev = (low_depth - mean_depth) / 3.
         z_levels = []
         while len(z_levels) < self.number_of_particles:

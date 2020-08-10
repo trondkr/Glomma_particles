@@ -26,6 +26,8 @@ class ConfigPlot():
         self.ymax = 59.35
         self.ROMSFILE = None
         self.projection = ccrs.PlateCarree()
+        self.required_resolution = 1.0  # km between bins
+        self.sed_crit = 0.1 # meter above seabed for deposition/sedimentation
 
         self.etopo1 = '/Users/trondkr/Dropbox/NIVA/Farallon/QIN/oceanography/ETOPO1/ETOPO1_Ice_g_gmt4.grd'
 

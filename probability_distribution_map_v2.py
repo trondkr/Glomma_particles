@@ -1,205 +1,187 @@
 # coding=utf-8
- 
-import os, sys
+
+from typing import List
+
+import matplotlib.pyplot as plt
 import numpy as np
 import numpy.ma as ma
-import glob
-import matplotlib
-from matplotlib.pyplot import cm 
-import matplotlib.pyplot as plt
-
 import pandas as pd
 import xarray as xr
-from datetime import datetime
-from netCDF4 import Dataset, date2num,num2date
-from scipy.ndimage.filters import gaussian_filter
+from haversine import haversine
 from matplotlib.colors import BoundaryNorm
 from matplotlib.ticker import MaxNLocator
-import animate_scatter
-import time
-import utils
-import config_sedimentdrift as confm
-from fast_histogram import histogram2d
-import cmocean
-import laplacefilter
-import common_tools_drift
-from matplotlib.pyplot import cm 
-import circle_of_distance
+
+# from fast_histogram import histogram2d
 import bathymetry
-from haversine import haversine, Unit
+import common_tools_drift as ct
 import config_plot
+import config_sedimentdrift
+from circle_of_distance import Circle_of_distance
+
 
 class SedimentDistribution():
 
     def __init__(self):
-        self.output_filename = output_filename
         self.config = config_plot.ConfigPlot()
         self.config_sedimentdrift = config_sedimentdrift.MartiniConf()
         bath = bathymetry.Bathymetry(self.config)
-        bath.add_bathymetry_from_etopo1()
+        #  bath.add_bathymetry_from_etopo1()
+        self.dx = None;
+        self.dy = None;
+        self.lon_bins = None;
+        self.lat_bins = None
 
-def find_depth(data):
-    data['z'] = data['z'] * -1.
-    # ! find first non nan at first and cut the rest 
-    data = data.where(data.z != np.nan)
-    data = data.where(data.sea_floor_depth_below_sea_level != 'nan',drop = True)
-    # find differences between floor depth and particle depth for each trajectory
-    data['dif_depth'] =  data.sea_floor_depth_below_sea_level - data.z 
-    return data
+    def get_start(self, d, n):
+        # find index of the release event,
+        # first non masked element
+        arr = np.ma.masked_invalid(d.dif_depth[n].values)
+        if arr.count() == 0:
+            return None
+        return np.ma.flatnotmasked_edges(arr)[0]
 
-def get_start(d,n):
-    # find index of the release event, 
-    # first non masked element
-    arr = np.ma.masked_invalid(d.dif_depth[n].values)
-    if arr.count() == 0:
-        return None
-    return np.ma.flatnotmasked_edges(arr)[0]
+    def get_active_passive(self, status):
+        return ["active", "passive"][status]
 
-def get_sed(confobj,d,n,start = None):
-   
-    if start == None:
-        start = get_start(d,n)
-    # find index in array of sedimentations time 
-    # first time when difference between seafloor 
-    # mask non-sedimented particles
-    arr = np.ma.masked_greater(d.dif_depth[n].values[start:],confobj.sed_crit)   
-    if arr.count() == 0:
-        return None
-    return np.ma.flatnotmasked_edges(arr)[0]
-    
-def get_pos(confobj):     
-    print("Opening file {}".format(confobj.paths)) 
-    df = xr.open_mfdataset(confobj.paths, concat_dim='trajectory') 
+    def extract_data(self, data, filter_options:List):
+        np.warnings.filterwarnings('ignore')
 
-    d = df.groupby(df.trajectory).apply(find_depth) #.sel(time=slice(confobj.startdate, confobj.enddate))
-    parts = range(0,len(d.trajectory)-1)
-    indexes=[]
-    print("Number of trajectories {}".format(len(parts)))
-    indexes = [get_sed(confobj,d,n) for n in parts]
-   
-    lons=[]; lats=[]; z=[]; time=[]
-    for i,index in enumerate(indexes):
-        if index is not None:
-            print("Running trajectory {} sediment index {}".format(i,index))
-            lons.append(d.lon[i,index].values)  
-            lats.append(d.lat[i,index].values)
-            z.append(d.z[i,index].values)
-            time.append(d.time[index].values)    
+        # Remove all standard nans
+        data['z'] = data['z'] * -1.
+        data = data.where(data.z != np.nan, drop=True)
 
-    return np.array([np.array(xi) for xi in lats]), np.array([np.array(xi) for xi in lons]), np.array([np.array(xi) for xi in z]), np.array([np.array(xi) for xi in time])
+        if "density_max" and "density_min" in filter_options.keys() and not None:
+            data = data.where((data.density >= float(filter_options["density_min"]))
+                              & (data.density <= float(filter_options["density_max"]))
+                              & (data.status == int(filter_options["status"])), drop=True)
 
-def createBins(confobj):
- 
-    print('func: createBins() => Creating bins for averaging')
-    
-    dy = haversine((confobj.probymin,confobj.probxmin),(confobj.probymax,confobj.probxmin))
-    dx = haversine((confobj.probymin,confobj.probxmin),(confobj.probymin,confobj.probxmax))
+        if "selected_month" in filter_options.keys() and filter_options["selected_month"] is not None:
+            data = data.where(data.time.dt.month == int(filter_options["selected_month"]), drop=True)
 
-    print("Distance from minimum to maximim longitude binned area is %s km"%(dx))
-    print("Distance from minimum to maximim latitude binned area is %s km"%(dy))
+        if "selected_day" in filter_options.keys() and not None:
+            data = data.where(data.time.dt.day == int(filter_options["selected_day"]), drop=True)
 
-    nx=int(abs(dx/confobj.requiredResolution))
-    ny=int(abs(dy/confobj.requiredResolution))
-    print("nx {} ny {}".format(nx,ny))
+        return data
 
-    confobj.lon_bins = np.linspace(np.floor(confobj.xmin),np.ceil(confobj.xmax),nx,endpoint=True) 
-    confobj.dx=len(confobj.lon_bins)
-    print("DELTA X = {}".format(confobj.lon_bins))
- 
-    confobj.lat_bins = np.linspace(np.floor(confobj.ymin),np.ceil(confobj.ymax),ny,endpoint=True) 
-    print("DELTA Y = {}".format(confobj.lat_bins))
-    confobj.dy=len(confobj.lat_bins)
-     
-    print('=> created binned array of domain of grid cell size (%s,%s) with resolution %s'%(confobj.deltaX,confobj.deltaY,confobj.requiredResolution))
-     
-def get_density(lats, lons, nlevels, confobj):
- 
-   # XX=np.ma.masked_where(lons>200, lons)
-   # YY=np.ma.masked_where(lats>200, lats)
-    density, xedges, yedges = np.histogram2d(lons.flatten(), lats.flatten(), 
-                                            range=[[confobj.probxmin,confobj.probxmax],
-                                            [confobj.probymin,confobj.probymax]], 
-                                            bins=[confobj.dx,confobj.dy])
-    
-    total = np.sum(density)
-    density=(density/total)*100.
-     
-    print("Total number of points {} percentage sum {}".format(total,np.sum(density)))
-    density = ma.masked_where(density == 0, density)
-    levels = MaxNLocator(nbins=nlevels).tick_values(0.1,2)
-    levels=np.arange(0.1,4,0.1)
- 
-    norm = BoundaryNorm(levels, ncolors=confobj.cmap.N, clip=True)
- 
-    density = density.T
-    tox, toy = np.meshgrid(xedges, yedges)
-    Xd, Yd = confobj.mymap(tox, toy)
+    def extract_filtered_data(self, file_list: List, filter_options: List):
 
-    # Turn the lon/lat of the bins into 2 dimensional arrays 
-  #  lon_bins_2d, lat_bins_2d = np.meshgrid(confobj.lon_bins, confobj.lat_bins)
-   
-    return Xd,Yd,density #lon_bins_2d,lat_bins_2d,density,norm
+        # Get the data and group by trajectory
+        df = xr.open_mfdataset(file_list, concat_dim='trajectory', combine='nested')
+        #      df = df.sel(density=slice(float(filter_options["density_min"]),float(filter_options["density_max"])))
 
-def make_map(confobj):
-    create_map(confobj)
-    lats,lons,depths,times = get_pos(confobj)
-    
-    createBins(confobj)  
-    confobj.mymap.drawparallels(confobj.lat_bins,linewidth=0.2, fmt='%g'+ 'E', fontsize=5, color='gray', labels=[True,False,False,False]) 
-    confobj.mymap.drawmeridians(confobj.lon_bins,linewidth=0.2, fmt='%g'+ 'E', fontsize=5, color='gray',labels=[False,False,False,True])
+        ds = df.groupby(df.trajectory).apply(self.extract_data, args=(filter_options,))
 
-    confobj.results_startdate=times[0]
-    confobj.results_enddate=times[-1]
-    
-    if confobj.plot_type == 'heatmap':
-        confobj.cmap = plt.get_cmap(confobj.cmapname)
-        nlevels=10
-        print(np.shape(lats),np.shape(lons))
-        Xd,Yd,density = get_density(lats, lons, nlevels, confobj)
+        indexes = (~np.isnan(ds.density.values)).sum(axis=1) - 1
 
-        cs = confobj.mymap.pcolormesh(Xd,Yd, density, cmap=confobj.cmap, edgecolors='face',linewidths=0.1) #,alpha=0.8)  #norm=norm,
-        #cs = confobj.mymap.contourf(Xd[:-1, :-1],Yd[:-1, :-1], density, cmap=confobj.cmap,levels = 50) #,edgecolors='face',linewidths=0.1) #,alpha=0.8)  #norm=norm,
+        lons = ds.lon[:, indexes].values
+        lats = ds.lat[:, indexes].values
 
-        # LOKI distribution/seed area
-        X,Y = circle_of_distance.createCircleAroundWithRadius(confobj.st_lats[0], confobj.st_lons[0], confobj.releaseRadius / 1000.)
-        confobj.mymap.plot(X,Y,latlon=True,marker=None,color='y',linewidth=0.9)
+        z = ds.z[:, indexes].values
+        time = ds.time[indexes].values
 
-        # LOKI main point
-        x,y = confobj.mymap(confobj.st_lons[0], confobj.st_lats[0])
-        confobj.mymap.plot(x,y ,marker='D',color='r',markersize=0.4)
+        return np.array([np.array(xi) for xi in lats]), np.array([np.array(xi) for xi in lons]), np.array(
+            [np.array(xi) for xi in z]), np.array([np.array(xi) for xi in time])
 
-        plt.colorbar(cs, shrink=0.7)
+    def createBins(self):
 
-    elif confobj.plot_type == 'scatter':
-        x,y = confobj.mymap(lons,lats)
-        confobj.mymap.scatter(x,y,alpha = 0.3,c = 'r',s = 1)
- 
-        # LOKI distribution/seed area
-        X,Y = circle_of_distance.createCircleAroundWithRadius(confobj.st_lats[0], confobj.st_lons[0], confobj.releaseRadius / 1000.)
-        confobj.mymap.plot(X,Y,latlon=True,marker=None,color='b',linewidth=0.2)
- 
-        # LOKI main point
-        x,y = confobj.mymap(confobj.st_lons[0], confobj.st_lats[0])
-        confobj.mymap.plot(x,y ,marker='D',color='b',markersize=0.2)
-        plt.colorbar(cs, shrink=1.0)
+        print('func: createBins() => Creating bins for averaging')
 
-    print("Printing figure to filee {} ".format(confobj.outputPlotFilename))
-    plt.savefig(confobj.outputPlotFilename,format = 'png',dpi = 300)
+        dy = haversine((self.config.ymin, self.config.xmin), (self.config.ymax, self.config.xmin))
+        dx = haversine((self.config.ymin, self.config.xmin), (self.config.ymin, self.config.xmax))
+
+        print("Distance from minimum to maximim longitude binned area is %s km" % (dx))
+        print("Distance from minimum to maximim latitude binned area is %s km" % (dy))
+
+        nx = int(abs(dx / self.config.required_resolution))
+        ny = int(abs(dy / self.config.required_resolution))
+        print("nx {} ny {}".format(nx, ny))
+
+        self.lon_bins = np.linspace(np.floor(self.config.xmin), np.ceil(self.config.xmax), nx, endpoint=True)
+        self.dx = len(self.lon_bins)
+        print("DELTA X = {}".format(self.lon_bins))
+
+        self.lat_bins = np.linspace(np.floor(self.config.ymin), np.ceil(self.config.ymax), ny, endpoint=True)
+        print("DELTA Y = {}".format(self.lat_bins))
+        self.dy = len(self.lat_bins)
+
+        print('=> created binned array of domain of grid cell size (%s,%s) with resolution %s' % (
+            self.dx, self.dy, self.config.required_resolution))
+
+    def get_density(self, lats, lons, nlevels):
+
+        density, xedges, yedges = np.histogram2d(lons.flatten(), lats.flatten(),
+                                                 range=[[self.config.xmin, self.config.xmax],
+                                                        [self.config.ymin, self.config.ymax]],
+                                                 bins=[self.dx, self.dy])
+
+        total = np.sum(density)
+        density = (density / total) * 100.
+
+        print("Total number of points {} percentage sum {}".format(total, np.sum(density)))
+        density = ma.masked_where(density == 0, density)
+        levels = MaxNLocator(nbins=nlevels).tick_values(0.1, 2)
+        levels = np.arange(0.1, 4, 0.1)
+        cmap = plt.get_cmap('Spectral_r')
+
+        norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
+
+        density = density.T
+        Xd, Yd = np.meshgrid(xedges, yedges)
+
+        return Xd, Yd, density
+
+    def create_distributional_map(self, filelist, filter_options):
+
+        lats, lons, depths, times = self.extract_filtered_data(filelist, filter_options)
+
+        start_date = pd.to_datetime(times[0])
+        end_date = pd.to_datetime(times[-1])
+
+        output_filename = ct.create_animation_or_png_filename(start_date, end_date, "clay", "png")
+
+        self.createBins()
+        # confobj.mymap.drawparallels(confobj.lat_bins,linewidth=0.2, fmt='%g'+ 'E', fontsize=5, color='gray', labels=[True,False,False,False])
+        # confobj.mymap.drawmeridians(confobj.lon_bins,linewidth=0.2, fmt='%g'+ 'E', fontsize=5, color='gray',labels=[False,False,False,True])
+
+        nlevels = 10
+        Xd, Yd, density = self.get_density(lats, lons, nlevels)
+
+        cplot = self.config.ax.pcolormesh(Xd, Yd, density,
+                                          cmap="RdYlBu_r",
+                                          edgecolors='face',
+                                          linewidths=0.1)
+        # cs = confobj.mymap.contourf(Xd[:-1, :-1],Yd[:-1, :-1], density, cmap=confobj.cmap,levels = 50) #,edgecolors='face',linewidths=0.1) #,alpha=0.8)  #norm=norm,
+
+        # Seed area drawn as a circle
+        cs = Circle_of_distance()
+        X, Y = cs.create_circle_with_radius(self.config_sedimentdrift.st_lats[0],
+                                            self.config_sedimentdrift.st_lons[0],
+                                            self.config_sedimentdrift.release_radius / 1000.)
+        self.config.ax.plot(X, Y, marker=None, color='y', linewidth=0.9)
+
+        self.config.ax.plot(self.config_sedimentdrift.st_lons[0],
+                            self.config_sedimentdrift.st_lats[0],
+                            marker='D',
+                            color='r',
+                            markersize=0.4)
+        plt.colorbar(cplot, shrink=0.7)
+
+        print("Printing figure to filee {} ".format(output_filename))
+        plt.savefig(output_filename, format='png', dpi=300)
+        plt.show()
+
 
 def main():
     infilenames = ["output/Glomma_clay_drift_20190501_to_20190510.nc"]
-    particle = "clay"
 
-    df = ct.get_pos_function_of_time(infilenames)
+    filter_options = {"density_min": 0,
+                      "density_max": 2000.,
+                      "selected_month": None,
+                      # "selected_day": 7,
+                      "status": 1}
 
-    lats = df['lat'][:].values
-    lons = df['lon'][:].values
-    z = df['z'][:].values
-    time = df['time'][:].values
-    start_date = pd.to_datetime(time[0])
-    end_date = pd.to_datetime(time[-1])
+    distribution = SedimentDistribution()
+    distribution.create_distributional_map(infilenames, filter_options)
 
-    output_filename = ct.create_animation_or_png_filename(start_date, end_date, particle, "mp4")
 
 if __name__ == "__main__":
-    make_map()
+    main()

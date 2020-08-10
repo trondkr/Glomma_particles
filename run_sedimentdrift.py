@@ -12,7 +12,7 @@ __email__ = 'me (at) trondkristiansen.com'
 __created__ = datetime(2020, 6, 29)
 __modified__ = datetime(2020, 7, 20)
 __version__ = "1.0"
-__status__ = "Development, modified on 29.06.2020, 20.07.2020"
+__status__ = "Development, modified on 29.06.2020, 20.07.2020, 10.08.2020"
 
 
 class Sediment_Organizer:
@@ -29,7 +29,7 @@ class Sediment_Organizer:
         o.set_config('drift:vertical_advection', True)
         o.set_config('vertical_mixing:diffusivitymodel', 'gls_tke')
         o.set_config('vertical_mixing:TSprofiles', False)
-     #   o.set_config('drift:scheme', 'runge-kutta4')
+        o.set_config('drift:scheme', 'runge-kutta4')
         o.set_config('drift:lift_to_seafloor', True)
         o.set_config('vertical_mixing:update_terminal_velocity', True)
         o.set_config('drift:current_uncertainty', .2)
@@ -38,9 +38,13 @@ class Sediment_Organizer:
 
         return o
 
+    def create_input_file_list(self):
+        # Files for 2019 starts at index 730 (01/01/2019) and ends at 1095 (31/12/2019)
+        return [self.confobj.datadir+self.confobj.pattern+str(i).zfill(4)+".nc" for i in range(730, 1096)]
+
     def create_and_run_simulation(self):
         o = self.setup_and_config_sediment_module()
-        reader_physics = reader_ROMS_native.Reader(self.confobj.datadir + self.confobj.pattern)
+        reader_physics = reader_ROMS_native.Reader(self.create_input_file_list())
         o.add_reader([reader_physics])
 
         logging.debug("Releasing {} sediments between {} and {}".format(self.confobj.species,
@@ -59,8 +63,8 @@ class Sediment_Organizer:
         logging.debug('Elements scheduled for {} : {}'.format(self.confobj.species, o.elements_scheduled))
 
         o.run(end_time=self.confobj.end_date,
-              time_step=timedelta(minutes=10),
-              time_step_output=timedelta(minutes=10),
+              time_step=timedelta(minutes=30),
+              time_step_output=timedelta(minutes=30),
               outfile=self.confobj.outputFilename,
               export_variables=['sea_floor_depth_below_sea_level', 'z', 'diameter', 'density','terminal_velocity'])
 

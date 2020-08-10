@@ -5,7 +5,7 @@ import os
 def get_pos_function_of_time(paths):
  
     df = xr.open_mfdataset(paths,concat_dim='trajectory',combine='nested')
-    df = df.where(df.status > -1, drop = True)
+   # df = df.where(df.status > -1, drop = True)
     d = df.groupby(df.trajectory).apply(find_depth)
     
     return d

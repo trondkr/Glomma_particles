@@ -30,6 +30,9 @@ class SedimentElement(Lagrangian3DArray):
         ('settled', {'dtype': np.int16,  # 0 is active, 1 is settled
                      'unit': '1',
                      'default': 0}),
+        ('resuspended', {'dtype': np.int16,  # 0 is not, 1 is resuspended
+                     'unit': '1',
+                     'default': 0}),
         ('diameter', {'dtype': np.float32,
                       'units': 'm',
                       'default': 0.0001}),
@@ -151,9 +154,7 @@ class SedimentDrift(OceanDrift):
         # they are re-suspended. May then need to send a boolean
         # array to advection methods below
         if self.get_config('vertical_mixing:update_terminal_velocity') is True:
-
-            print("UPDATE TERMINAL VEL")
-            self.update_terminal_velocity()
+           self.update_terminal_velocity()
 
         self.advect_ocean_current()
 
@@ -166,7 +167,7 @@ class SedimentDrift(OceanDrift):
         self.vertical_mixing()  # Including buoyancy and settling
 
         self.resuspension()
-        print("self.elements.z",self.elements.z)
+
     def bottom_interaction(self, seafloor_depth):
         """Sub method of vertical_mixing, determines settling"""
 
@@ -177,11 +178,12 @@ class SedimentDrift(OceanDrift):
                                  reason='settled')
 
     def resuspension(self):
-        """Resuspending elements if current speed > .5 m/s"""
+        """Resuspending elements if current speed > .25 m/s"""
         resuspending = np.logical_and(self.current_speed() > .25, self.elements.moving == 0)
         if np.sum(resuspending) > 0:
-            print("Resuspending {} particles".format(resuspending))
+
             # Allow moving again
             self.elements.moving[resuspending] = 1
+            self.elements.resuspended[resuspending] = 1
             # Suspend 1 cm above seafloor
-            self.elements.z[resuspending] = self.elements.z[resuspending] + .01 # 10 cm
+            self.elements.z[resuspending] = self.elements.z[resuspending] + .05 # 5 cm
