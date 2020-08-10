@@ -38,13 +38,13 @@ class Sediment_Organizer:
 
         return o
 
-    def create_input_file_list(self):
+    def create_MARTINI_input_file_list(self):
         # Files for 2019 starts at index 730 (01/01/2019) and ends at 1095 (31/12/2019)
         return [self.confobj.datadir+self.confobj.pattern+str(i).zfill(4)+".nc" for i in range(730, 1096)]
 
     def create_and_run_simulation(self):
         o = self.setup_and_config_sediment_module()
-        reader_physics = reader_ROMS_native.Reader(self.create_input_file_list())
+        reader_physics = reader_ROMS_native.Reader(self.create_MARTINI_input_file_list())
         o.add_reader([reader_physics])
 
         logging.debug("Releasing {} sediments between {} and {}".format(self.confobj.species,
@@ -66,7 +66,7 @@ class Sediment_Organizer:
               time_step=timedelta(minutes=30),
               time_step_output=timedelta(minutes=30),
               outfile=self.confobj.outputFilename,
-              export_variables=['sea_floor_depth_below_sea_level', 'z', 'diameter', 'density','terminal_velocity'])
+              export_variables=['sea_floor_depth_below_sea_level', 'z', 'diameter', 'density','resuspended','terminal_velocity'])
 
         o.animation(color='z', fast=False, buffer=.01, filename="test.mp4")
        # o.plot_property('z', filename="test.png")

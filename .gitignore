@@ -6,6 +6,7 @@ LISST/*
 .ipynb_checkpoints/**
 output/*
 *.nc
-*Figures/**
+*Figures/*.png
+Figures/**
 *.png
 *.mp4
