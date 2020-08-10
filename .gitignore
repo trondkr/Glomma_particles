@@ -8,5 +8,4 @@ output/*
 *.nc
 *Figures/*.png
 Figures/**
-*.png
 *.mp4

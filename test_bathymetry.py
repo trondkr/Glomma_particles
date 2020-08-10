@@ -36,10 +36,10 @@ class TestBathymetry(unittest.TestCase):
         bathymetry = Bathymetry(config_sediment)
         self.assertIsInstance(bathymetry.config, ConfigPlot)
 
-    def test_bathymetry_config_initialize_empty_ax(self):
+    def test_bathymetry_config_initialize_nonempty_ax(self):
         config_sediment = ConfigPlot()
         bathymetry = Bathymetry(config_sediment)
-        self.assertIsNone(bathymetry.config.ax)
+        self.assertIsNotNone(bathymetry.config.ax)
 
 
 if __name__ == "__main__":
