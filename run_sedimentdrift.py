@@ -45,6 +45,7 @@ class Sediment_Organizer:
     def create_and_run_simulation(self):
         o = self.setup_and_config_sediment_module()
         reader_physics = reader_ROMS_native.Reader(self.create_MARTINI_input_file_list())
+        o.multiprocessing_fail = True
         o.add_reader([reader_physics])
 
         logging.debug("Releasing {} sediments between {} and {}".format(self.confobj.species,
