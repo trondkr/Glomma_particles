@@ -19,6 +19,31 @@ self.diameters = self.generate_gaussian_distribution(0.05e-3, 0.01e-3/3., self.n
 self.densities = self.generate_gaussian_distribution(1200, 1000/3., self.number_of_particles)
 ```
 
+**Calculate sedimentation**
+After running the model we now have to analyse the output. This is done using various plotting and animation scripts (see below) but the key 
+script is called `probability_distibution_v2.py`. The script organizes the simulation results by grouping into 
+individual trajectories.
+```Python
+df = xr.open_mfdataset(file_list, concat_dim='trajectory', combine='nested')
+ds = df.groupby(df.trajectory).apply(self.extract_data, args=(filter_options,))
+```
+Once grouped we can filter the data per trajectory to only analyse what we are interested in. This is done by submitting an
+options dictionary to the groupby.apply function.
+
+```Python
+ filter_options = {"density_min": 0,
+                   "density_max": 2000.,
+                   "selected_month": 2,
+                   "selected_day": 7,
+                   "status": 1}
+```
+
+This particular filter will keep only particles with densities between `0` to `2000`, for month `2` (February), day `7`, and only 
+keep particles that have settled on the bottom  (`status=1`). The data are then organized into bins that cover the region of interest 
+with the given resolution of interest. For example, you can define the resolution of the bins to be `1km`, `1m` or whatever you want and 
+this is done in the file `config_plot.py`. The histogram is then calculated for the bins and displayed as a pcolormesh plot.
+
+![Example sediment distribution](Figures_README/Glomma_clay_drift_20190510_to_20190510.png)
 
 **Plotting**
 - `create_maps_and_animations.py` - main plot script

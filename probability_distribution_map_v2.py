@@ -66,8 +66,6 @@ class SedimentDistribution():
 
         # Get the data and group by trajectory
         df = xr.open_mfdataset(file_list, concat_dim='trajectory', combine='nested')
-        #      df = df.sel(density=slice(float(filter_options["density_min"]),float(filter_options["density_max"])))
-
         ds = df.groupby(df.trajectory).apply(self.extract_data, args=(filter_options,))
 
         indexes = (~np.isnan(ds.density.values)).sum(axis=1) - 1
