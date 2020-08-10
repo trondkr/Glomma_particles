@@ -24,7 +24,7 @@ class SedimentDistribution():
     def __init__(self):
         self.config = config_plot.ConfigPlot()
         self.config_sedimentdrift = config_sedimentdrift.MartiniConf()
-        bath = bathymetry.Bathymetry(self.config)
+        self.bath = bathymetry.Bathymetry(self.config)
         #  bath.add_bathymetry_from_etopo1()
         self.dx = None;
         self.dy = None;
