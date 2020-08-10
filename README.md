@@ -42,7 +42,6 @@ This particular filter will keep only particles with densities between `0` to `2
 keep particles that have settled on the bottom  (`status=1`). The data are then organized into bins that cover the region of interest 
 with the given resolution of interest. For example, you can define the resolution of the bins to be `1km`, `1m` or whatever you want and 
 this is done in the file `config_plot.py`. The histogram is then calculated for the bins and displayed as a pcolormesh plot.
-
 ![Example sediment distribution](Figures_README/Glomma_clay_drift_20190510_to_20190510.png)
 
 **Plotting**

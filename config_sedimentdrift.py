@@ -29,7 +29,7 @@ class MartiniConf():
         print('Started ' + time.ctime(time.time()))
         self.debug = True
         self.start_date: datetime = datetime(2019, 1, 1)
-        self.end_date: datetime = datetime(2019, 1, 5)
+        self.end_date: datetime = datetime(2019, 12, 30)
         self.outputdir = None
         self.verticalBehavior = False
         self.basedir = '/cluster/projects/nn9297k/Glomma_particles/'
@@ -42,12 +42,12 @@ class MartiniConf():
         # Glomma - seed locations
         self.st_lons = [10.962920]
         self.st_lats = [59.169194]
-        self.number_of_particles = 100000
+        self.number_of_particles = 60000
         self.release_radius = 50
         # diameter in meter, densities in kg/m3
 
         self.diameters = self.generate_gaussian_distribution(0.05e-3, 0.01e-3/3.,self.number_of_particles)
-        self.densities = self.generate_gaussian_distribution(1200, 1000/3.,self.number_of_particles)
+        self.densities = self.generate_gaussian_distribution(1000, 500/3.,self.number_of_particles)
 
         self.outputFilename = None
         self.results_startdate = None
