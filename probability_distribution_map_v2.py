@@ -169,7 +169,7 @@ class SedimentDistribution():
 
 
 def main():
-    infilenames = ["output/Glomma_clay_drift_20190501_to_20190510.nc"]
+    infilenames = ["output/Glomma_clay_drift_20190101_to_20191230.nc"]
 
     filter_options = {"density_min": 0,
                       "density_max": 2000.,

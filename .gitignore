@@ -9,3 +9,4 @@ output/*
 *Figures/*.png
 Figures/**
 *.mp4
+.coverage
