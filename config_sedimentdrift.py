@@ -42,7 +42,7 @@ class MartiniConf():
         # Glomma - seed locations
         self.st_lons = [10.962920]
         self.st_lats = [59.169194]
-        self.number_of_particles = 60000
+        self.number_of_particles = 10000
         self.release_radius = 50
         # diameter in meter, densities in kg/m3
 
