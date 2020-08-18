@@ -6,6 +6,7 @@ from opendrift.readers import reader_ROMS_native
 
 from config_sedimentdrift import MartiniConf
 from sedimentdrift import SedimentDrift
+from calendar import monthrange
 
 __author__ = 'Trond Kristiansen'
 __email__ = 'me (at) trondkristiansen.com'
@@ -87,10 +88,11 @@ class Sediment_Organizer:
 
 
 def main():
-    for month in range(1,12,1):
+    for month in range(1,13,1):
         run = Sediment_Organizer()
+        days_in_month = int(monthrange(2019, month)[1])
         run.confobj.start_date = datetime(2019, month, 1)
-        run.confobj.end_date = datetime(2019, month+1, 30)
+        run.confobj.end_date = datetime(2019, month, days_in_month)
         run.start_simulations()
 
 
