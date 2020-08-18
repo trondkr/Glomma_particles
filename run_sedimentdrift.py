@@ -65,7 +65,7 @@ class Sediment_Organizer:
 
         o.run(end_time=self.confobj.end_date,
               time_step=timedelta(minutes=30),
-              time_step_output=timedelta(minutes=30),
+              time_step_output=timedelta(hours=2),
               outfile=self.confobj.outputFilename,
               export_variables=['sea_floor_depth_below_sea_level', 'z', 'diameter', 'density','resuspended','terminal_velocity'])
 
@@ -87,8 +87,11 @@ class Sediment_Organizer:
 
 
 def main():
-    run = Sediment_Organizer()
-    run.start_simulations()
+    for month in range(1,12,1):
+        run = Sediment_Organizer()
+        run.confobj.start_date = datetime(2019, month, 1)
+        run.confobj.end_date = datetime(2019, month+1, 30)
+        run.start_simulations()
 
 
 if __name__ == '__main__':
