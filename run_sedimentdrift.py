@@ -65,8 +65,8 @@ class Sediment_Organizer:
         logging.debug('Elements scheduled for {} : {}'.format(self.confobj.species, o.elements_scheduled))
 
         o.run(end_time=self.confobj.end_date,
-              time_step=timedelta(minutes=30),
-              time_step_output=timedelta(hours=2),
+              time_step=timedelta(minutes=10),
+              time_step_output=timedelta(minutes=20),
               outfile=self.confobj.outputFilename,
               export_variables=['sea_floor_depth_below_sea_level', 'z', 'diameter', 'density','resuspended','terminal_velocity'])
 

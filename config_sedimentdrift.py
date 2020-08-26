@@ -42,7 +42,7 @@ class MartiniConf():
         # Glomma - seed locations
         self.st_lons = [10.962920]
         self.st_lats = [59.169194]
-        self.number_of_particles = 10000
+        self.number_of_particles = 200
         self.release_radius = 50
         # diameter in meter, densities in kg/m3
 
@@ -83,7 +83,7 @@ class MartiniConf():
         if not os.path.exists(self.outputdir): os.mkdir(self.outputdir)
 
         # Spread particles/sediments using a Gauss shape in the upper surface
-        low_depth, mean_depth, high_depth = -1, -0.1, 0
+        low_depth, mean_depth, high_depth = -0.05, -0.01, 0
         stdev = (low_depth - mean_depth) / 3.
         z_levels = []
         while len(z_levels) < self.number_of_particles:

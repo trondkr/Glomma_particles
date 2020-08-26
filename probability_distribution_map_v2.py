@@ -4,7 +4,6 @@ from typing import List
 
 import matplotlib.pyplot as plt
 import numpy as np
-import numpy.ma as ma
 import pandas as pd
 import xarray as xr
 from haversine import haversine
@@ -17,7 +16,9 @@ import common_tools_drift as ct
 import config_plot
 import config_sedimentdrift
 from circle_of_distance import Circle_of_distance
-
+import dask.dataframe as dd
+from timeit import default_timer as timer
+import glob
 
 class SedimentDistribution():
 
@@ -42,39 +43,70 @@ class SedimentDistribution():
     def get_active_passive(self, status):
         return ["active", "passive"][status]
 
-    def extract_data(self, data, filter_options:List):
+    def filter_data(self, df, filter_options:List):
         np.warnings.filterwarnings('ignore')
 
-        # Remove all standard nans
-        data['z'] = data['z'] * -1.
-        data = data.where(data.z != np.nan, drop=True)
+        df = df[df.status == (filter_options["status"])]
 
         if "density_max" and "density_min" in filter_options.keys() and not None:
-            data = data.where((data.density >= float(filter_options["density_min"]))
-                              & (data.density <= float(filter_options["density_max"]))
-                              & (data.status == int(filter_options["status"])), drop=True)
+            df = df[(df.density >= float(filter_options["density_min"]))
+                      & (df.density <= float(filter_options["density_max"]))
+                      & (df.status == int(filter_options["status"]))]
 
         if "selected_month" in filter_options.keys() and filter_options["selected_month"] is not None:
-            data = data.where(data.time.dt.month == int(filter_options["selected_month"]), drop=True)
+            df = df[df.time.dt.month == int(filter_options["selected_month"])]
 
         if "selected_day" in filter_options.keys() and not None:
-            data = data.where(data.time.dt.day == int(filter_options["selected_day"]), drop=True)
+            df = df[df.time.dt.day == int(filter_options["selected_day"])]
 
+        return df
+
+    def return_ds(self, data):
         return data
+
+    def get_indexes_of_last_valid_position(self, ds, var_name="density"):
+        # Assuming coordinates [time, trajectory]
+        masked_data=np.ma.masked_invalid(ds[var_name].values)
+        firstlast = np.ma.notmasked_edges(masked_data, axis=0)
+
+        return firstlast[1][0]
 
     def extract_filtered_data(self, file_list: List, filter_options: List):
 
+        print("[Probability] Start filtering dataframe using dask")
+        start = timer()
+
         # Get the data and group by trajectory
-        df = xr.open_mfdataset(file_list, concat_dim='trajectory', combine='nested')
-        ds = df.groupby(df.trajectory).apply(self.extract_data, args=(filter_options,))
+        df = xr.open_mfdataset(file_list, concat_dim='trajectory', combine='nested').to_dataframe()
+        # Convert from multi-index (date - trajectory) to single index (date) to use Dask
+        df = df.reset_index(level="time")
 
-        indexes = (~np.isnan(ds.density.values)).sum(axis=1) - 1
+        # Convert to Dask dataframe with chunks
+        ddf = dd.from_pandas(df, 10)
 
-        lons = ds.lon[:, indexes].values
-        lats = ds.lat[:, indexes].values
+        # This one returns a Pandas dataframe
+        ddf = self.filter_data(ddf, filter_options).compute()
 
-        z = ds.z[:, indexes].values
-        time = ds.time[indexes].values
+        ddf = ddf.set_index(['time', ddf.index])
+        ds = ddf.groupby("trajectory").apply(self.return_ds).to_xarray()
+
+        end = timer()
+        print("[Probability] Finished filtering dataframe in {} seconds ".format(end - start))
+
+        indexes = self.get_indexes_of_last_valid_position(ds)
+        print("indexes", indexes)
+        print(ds.z[:,0].values)
+        print(indexes[0])
+
+        print(ds)
+        print()
+
+        lons = np.ma.masked_invalid(ds.lon[indexes,:].values)
+        lats = np.ma.masked_invalid(ds.lat[indexes,:].values)
+
+        z = np.ma.masked_invalid(ds.z[indexes,:].values)
+        print(z)
+        time = np.ma.masked_invalid(ds.time[indexes].values)
 
         return np.array([np.array(xi) for xi in lats]), np.array([np.array(xi) for xi in lons]), np.array(
             [np.array(xi) for xi in z]), np.array([np.array(xi) for xi in time])
@@ -115,7 +147,7 @@ class SedimentDistribution():
         density = (density / total) * 100.
 
         print("Total number of points {} percentage sum {}".format(total, np.sum(density)))
-        density = ma.masked_where(density == 0, density)
+        density = np.ma.masked_where(density == 0, density)
         levels = MaxNLocator(nbins=nlevels).tick_values(0.1, 2)
         levels = np.arange(0.1, 4, 0.1)
         cmap = plt.get_cmap('Spectral_r')
@@ -169,16 +201,18 @@ class SedimentDistribution():
 
 
 def main():
-    infilenames = ["output/Glomma_clay_drift_20190101_to_20191230.nc"]
+
+    infilenames = glob.glob("output/*.nc")
+
 
     filter_options = {"density_min": 0,
-                      "density_max": 2000.,
+                      "density_max": 1000.,
                       "selected_month": None,
-                      # "selected_day": 7,
+       #               "selected_day": 7,
                       "status": 1}
-
-    distribution = SedimentDistribution()
-    distribution.create_distributional_map(infilenames, filter_options)
+    for infile in infilenames:
+        distribution = SedimentDistribution()
+        distribution.create_distributional_map([infile], filter_options)
 
 
 if __name__ == "__main__":
