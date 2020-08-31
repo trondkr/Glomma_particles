@@ -42,6 +42,7 @@ class TestSedimentDrift(TestGLOMMA_init):
 
         densities_p = self.sediment_organizer.confobj.generate_gaussian_distribution(mean_d, std_d,
                                                                                      self.sediment_organizer.confobj.number_of_particles)
+
         self.assertTrue(np.all(densities_p > 0))
         self.assertTrue((min_d < np.mean(densities_p)) and (np.mean(densities_p) < max_d))
 

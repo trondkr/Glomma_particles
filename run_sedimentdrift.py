@@ -19,7 +19,6 @@ __status__ = "Development, modified on 29.06.2020, 20.07.2020, 10.08.2020"
 class Sediment_Organizer:
 
     def __init__(self):
-        print("Inside init for sediment organizer")
         self.confobj: MartiniConf = MartiniConf()
 
     # Setup the sediment object and configuration

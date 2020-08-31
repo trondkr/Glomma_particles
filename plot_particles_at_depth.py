@@ -15,7 +15,6 @@ register_matplotlib_converters()
 import seaborn as sns
 
 sns.set()
-import utils
 import time
 
 sed_crit = 0.1
@@ -30,7 +29,7 @@ def p_density(df, min_density, max_density, col, axis, norm):
     d = df
     d['dif_depth'] = d.sea_floor_depth_below_sea_level - d.z
     grp = d.groupby('trajectory')
-    loop = [[utils.get_start_sed_depth(d), n, d] for n, d in grp if utils.get_start_sed_depth(d) != (None, None, None)]
+  #  loop = [[utils.get_start_sed_depth(d), n, d] for n, d in grp if utils.get_start_sed_depth(d) != (None, None, None)]
 
     s = list(map(lambda x: x[0], loop))
     trajectories = list(map(lambda x: x[1], loop))

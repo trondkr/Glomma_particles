@@ -11,22 +11,22 @@ import matplotlib.pyplot as plt
 __author__ = 'Trond Kristiansen'
 __email__ = 'Trond.Kristiansen (at) niva.no'
 __created__ = datetime(2020, 8, 5)
-__modified__ = datetime(2020, 8, 5)
+__modified__ = datetime(2020, 8, 31)
 __version__ = "1.0"
-__status__ = "Development, modified on 05.08.2020"
+__status__ = "Development, modified on 05.08.2020, 31.08.2020"
 
 
 class ConfigPlot():
 
     def __init__(self):
         # Define the longitude/latitude boundaries of the plot or animation
-        self.xmin = 10.55
-        self.xmax = 11.3
-        self.ymin = 58.8
-        self.ymax = 59.35
+        self.xmin = 10.7
+        self.xmax = 11.25
+        self.ymin = 58.85
+        self.ymax = 59.25
         self.ROMSFILE = None
         self.projection = ccrs.PlateCarree()
-        self.required_resolution = 0.5  # km between bins
+        self.required_resolution = 1.0  # km between bins
         self.sed_crit = 0.1 # meter above seabed for deposition/sedimentation
 
         self.etopo1 = '/Users/trondkr/Dropbox/NIVA/Farallon/QIN/oceanography/ETOPO1/ETOPO1_Ice_g_gmt4.grd'
@@ -45,12 +45,10 @@ class ConfigPlot():
         self.ax.add_geometries(
             shp.geometries(), ccrs.PlateCarree(), edgecolor='black', facecolor='lightgrey', linewidth=0.2)
 
-        self.ax.add_feature(cfeature.LAKES, edgecolor='black')
-        self.ax.add_feature(cfeature.RIVERS, edgecolor='black')
+      #  self.ax.add_feature(cfeature.LAKES, edgecolor='black')
+      #  self.ax.add_feature(cfeature.RIVERS, edgecolor='black')
       #  self.ax.add_feature(rivers_10m, facecolor=cfeature.COLORS['water'],
       #                      edgecolor=cfeature.COLORS['water'])
-
-
 
     def get_map_extent(self):
         return [self.xmin, self.xmax, self.ymin, self.ymax]

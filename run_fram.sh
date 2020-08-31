@@ -10,7 +10,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --nodes=1
 
-#SBATCH -A nn9490k
+#SBATCH -A nn9297k
 
 # run time (max 7 days on normal, 30 minutes on devel, 2 hrs on short)
 #              d-hh:mm:ss

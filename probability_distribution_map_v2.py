@@ -1,7 +1,10 @@
 # coding=utf-8
 
+import glob
+from timeit import default_timer as timer
 from typing import List
 
+import dask.dataframe as dd
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -16,9 +19,7 @@ import common_tools_drift as ct
 import config_plot
 import config_sedimentdrift
 from circle_of_distance import Circle_of_distance
-import dask.dataframe as dd
-from timeit import default_timer as timer
-import glob
+
 
 class SedimentDistribution():
 
@@ -26,7 +27,7 @@ class SedimentDistribution():
         self.config = config_plot.ConfigPlot()
         self.config_sedimentdrift = config_sedimentdrift.MartiniConf()
         self.bath = bathymetry.Bathymetry(self.config)
-        #  bath.add_bathymetry_from_etopo1()
+        self.bath.add_bathymetry_from_etopo1()
         self.dx = None;
         self.dy = None;
         self.lon_bins = None;
@@ -43,15 +44,15 @@ class SedimentDistribution():
     def get_active_passive(self, status):
         return ["active", "passive"][status]
 
-    def filter_data(self, df, filter_options:List):
+    def filter_data(self, df, filter_options: List):
         np.warnings.filterwarnings('ignore')
 
         df = df[df.status == (filter_options["status"])]
 
         if "density_max" and "density_min" in filter_options.keys() and not None:
             df = df[(df.density >= float(filter_options["density_min"]))
-                      & (df.density <= float(filter_options["density_max"]))
-                      & (df.status == int(filter_options["status"]))]
+                    & (df.density <= float(filter_options["density_max"]))
+                    & (df.status == int(filter_options["status"]))]
 
         if "selected_month" in filter_options.keys() and filter_options["selected_month"] is not None:
             df = df[df.time.dt.month == int(filter_options["selected_month"])]
@@ -66,7 +67,7 @@ class SedimentDistribution():
 
     def get_indexes_of_last_valid_position(self, ds, var_name="density"):
         # Assuming coordinates [time, trajectory]
-        masked_data=np.ma.masked_invalid(ds[var_name].values)
+        masked_data = np.ma.masked_invalid(ds[var_name].values)
         firstlast = np.ma.notmasked_edges(masked_data, axis=0)
 
         return firstlast[1][0]
@@ -94,18 +95,11 @@ class SedimentDistribution():
         print("[Probability] Finished filtering dataframe in {} seconds ".format(end - start))
 
         indexes = self.get_indexes_of_last_valid_position(ds)
-        print("indexes", indexes)
-        print(ds.z[:,0].values)
-        print(indexes[0])
 
-        print(ds)
-        print()
+        lons = np.ma.masked_invalid(ds.lon[indexes, :].values)
+        lats = np.ma.masked_invalid(ds.lat[indexes, :].values)
 
-        lons = np.ma.masked_invalid(ds.lon[indexes,:].values)
-        lats = np.ma.masked_invalid(ds.lat[indexes,:].values)
-
-        z = np.ma.masked_invalid(ds.z[indexes,:].values)
-        print(z)
+        z = np.ma.masked_invalid(ds.z[indexes, :].values)
         time = np.ma.masked_invalid(ds.time[indexes].values)
 
         return np.array([np.array(xi) for xi in lats]), np.array([np.array(xi) for xi in lons]), np.array(
@@ -123,14 +117,14 @@ class SedimentDistribution():
 
         nx = int(abs(dx / self.config.required_resolution))
         ny = int(abs(dy / self.config.required_resolution))
-        print("nx {} ny {}".format(nx, ny))
+        #   print("nx {} ny {}".format(nx, ny))
 
         self.lon_bins = np.linspace(np.floor(self.config.xmin), np.ceil(self.config.xmax), nx, endpoint=True)
         self.dx = len(self.lon_bins)
-        print("DELTA X = {}".format(self.lon_bins))
+        #   print("DELTA X = {}".format(self.lon_bins))
 
         self.lat_bins = np.linspace(np.floor(self.config.ymin), np.ceil(self.config.ymax), ny, endpoint=True)
-        print("DELTA Y = {}".format(self.lat_bins))
+        #    print("DELTA Y = {}".format(self.lat_bins))
         self.dy = len(self.lat_bins)
 
         print('=> created binned array of domain of grid cell size (%s,%s) with resolution %s' % (
@@ -169,8 +163,8 @@ class SedimentDistribution():
         output_filename = ct.create_animation_or_png_filename(start_date, end_date, "clay", "png")
 
         self.createBins()
-        # confobj.mymap.drawparallels(confobj.lat_bins,linewidth=0.2, fmt='%g'+ 'E', fontsize=5, color='gray', labels=[True,False,False,False])
-        # confobj.mymap.drawmeridians(confobj.lon_bins,linewidth=0.2, fmt='%g'+ 'E', fontsize=5, color='gray',labels=[False,False,False,True])
+       # confobj.mymap.drawparallels(confobj.lat_bins,linewidth=0.2, fmt='%g'+ 'E', fontsize=5, color='gray', labels=[True,False,False,False])
+       # confobj.mymap.drawmeridians(confobj.lon_bins,linewidth=0.2, fmt='%g'+ 'E', fontsize=5, color='gray',labels=[False,False,False,True])
 
         nlevels = 10
         Xd, Yd, density = self.get_density(lats, lons, nlevels)
@@ -185,30 +179,30 @@ class SedimentDistribution():
         cs = Circle_of_distance()
         X, Y = cs.create_circle_with_radius(self.config_sedimentdrift.st_lats[0],
                                             self.config_sedimentdrift.st_lons[0],
-                                            self.config_sedimentdrift.release_radius / 1000.)
-        self.config.ax.plot(X, Y, marker=None, color='y', linewidth=0.9)
+                                            self.config_sedimentdrift.release_radius)
 
         self.config.ax.plot(self.config_sedimentdrift.st_lons[0],
                             self.config_sedimentdrift.st_lats[0],
                             marker='D',
                             color='r',
-                            markersize=0.4)
+                            markersize=2)
         plt.colorbar(cplot, shrink=0.7)
 
-        print("Printing figure to filee {} ".format(output_filename))
+        self.config.ax.plot(X, Y, marker="o", color='r', linewidth=2.9)
+        print(X, Y)
+
+        print("Printing figure to file {} ".format(output_filename))
         plt.savefig(output_filename, format='png', dpi=300)
         plt.show()
 
 
 def main():
-
     infilenames = glob.glob("output/*.nc")
 
-
     filter_options = {"density_min": 0,
-                      "density_max": 1000.,
+                      "density_max": 2000.,
                       "selected_month": None,
-       #               "selected_day": 7,
+                      #               "selected_day": 7,
                       "status": 1}
     for infile in infilenames:
         distribution = SedimentDistribution()
