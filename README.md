@@ -44,6 +44,29 @@ with the given resolution of interest. For example, you can define the resolutio
 this is done in the file `config_plot.py`. The histogram is then calculated for the bins and displayed as a pcolormesh plot.
 ![Example sediment distribution](Figures_README/Glomma_clay_drift_20190510_to_20190510.png)
 
+**Notes on filtering approach**
+The resulting datafiles after running `Opendrift` can contain millions of locations for thousands of particles. To quickly filter
+the results to just work with the data we are interested in, e.g. the location where particles settled, we apply a few tricks to speed things up.
+First of all, after reading the datafiles using `xarray` we convert the datasets to pandas dataframes. Next we convert the dataframe to a dask.dataframe
+which allows us to utilize Dask to filter the data using paralell processing. After the filtering has finished, the result is a Pandas dataframe
+which we run `groupby("trajectory")` and finally convert back to a `xarray.Dataarray`.
+
+```python
+        # Get the data and group by trajectory
+        df = xr.open_mfdataset(file_list, concat_dim='trajectory', combine='nested').to_dataframe()
+        # Convert from multi-index (date - trajectory) to single index (date) to use Dask
+        df = df.reset_index(level="time")
+
+        # Convert to Dask dataframe with chunks
+        ddf = dd.from_pandas(df, 10)
+
+        # This one returns a Pandas dataframe
+        ddf = self.filter_data(ddf, filter_options).compute()
+
+        ddf = ddf.set_index(['time', ddf.index])
+        ds = ddf.groupby("trajectory").apply(self.return_ds).to_xarray()
+```
+
 **Plotting**
 - `create_maps_and_animations.py` - main plot script
 - `config_plot.py` - configure and setup common plot properties  

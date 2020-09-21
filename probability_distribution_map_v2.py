@@ -179,18 +179,16 @@ class SedimentDistribution():
         cs = Circle_of_distance()
         X, Y = cs.create_circle_with_radius(self.config_sedimentdrift.st_lats[0],
                                             self.config_sedimentdrift.st_lons[0],
-                                            self.config_sedimentdrift.release_radius)
+                                            self.config_sedimentdrift.release_radius/1000.)
 
         self.config.ax.plot(self.config_sedimentdrift.st_lons[0],
                             self.config_sedimentdrift.st_lats[0],
                             marker='D',
                             color='r',
-                            markersize=2)
+                            markersize=1)
         plt.colorbar(cplot, shrink=0.7)
-
-        self.config.ax.plot(X, Y, marker="o", color='r', linewidth=2.9)
-        print(X, Y)
-
+        self.config.ax.plot(X, Y, marker=None, color='w', linewidth=1.0)
+        plt.title("{} to {}".format(start_date, end_date))
         print("Printing figure to file {} ".format(output_filename))
         plt.savefig(output_filename, format='png', dpi=300)
         plt.show()

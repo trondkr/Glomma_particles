@@ -38,6 +38,7 @@ class ConfigPlot():
         rivers_10m = cfeature.NaturalEarthFeature('physical', 'rivers_lake_centerlines', '10m')
 
         # Axes and properties
+        plt.clf()
         self.ax = plt.axes(projection=self.projection)
         self.ax.gridlines()
         self.ax.set_extent(self.get_map_extent(), self.projection)

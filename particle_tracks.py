@@ -20,26 +20,27 @@ class Tracks():
         bath.add_bathymetry_from_etopo1()
 
     def plot_tracks(self):
+
         for traj_index in range(len(self.lons[:, 0])):
-            print("Plotting trajectory {}".format(traj_index))
+            print("[Particle_tracks] Plotting trajectory {}".format(traj_index))
             x=self.lons[traj_index, (self.lons[traj_index, :] < 1e30)]
             y = self.lats[traj_index, (self.lats[traj_index, :] < 1e30)]
             z = self.z[traj_index, (self.lats[traj_index, :] < 1e30)]
 
-            self.config.ax.plot(x,
-                                y,
-                                c='k',
-                                alpha=0.5,
-                                linewidth=0.2)
-
-            scaled_z = (z - z.min()) / z.ptp()
-            colors = plt.cm.viridis(z) #scaled_z)
-            print("depth variation {} to {}".format(z.min(),z.max()))
-            cbar = self.config.ax.scatter(x, y, marker="o",
-                                   facecolors=colors,
-                                   s=2,
-                              alpha=0.9,
-                              linewidth=0.4)
+         #   self.config.ax.plot(x,
+         #                       y,
+         #                       c='k',
+         #                       alpha=0.5,
+         #                       linewidth=0.2)
+            if len(z > 0):
+               # scaled_z = (z - z.min()) / z.ptp()
+                colors = plt.cm.viridis(z)
+                print("[Particle_tracks] depth variation {} to {}".format(z.min(),z.max()))
+                cbar = self.config.ax.scatter(x, y, marker=None,
+                                       facecolors=colors,
+                                       s=2,
+                                  alpha=0.5,
+                                  linewidth=0.3)
 
         # Seed area drawn as a circle
         cs = Circle_of_distance()

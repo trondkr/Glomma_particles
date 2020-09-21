@@ -35,8 +35,8 @@ class TestSedimentDrift(TestGLOMMA_init):
         self.assertAlmostEqual(1028.10, self.sediment_drift.sea_water_density(T, S), places=1)
 
     def test_generate_densities_returns_correct_range(self):
-        min_d=1000
-        max_d=2000
+        min_d=100
+        max_d=200
         mean_d=1500
         std_d=500/3.
 
@@ -51,7 +51,7 @@ class TestSedimentDrift(TestGLOMMA_init):
     # done in Glomma June 2020. Particle sizes ranged from 0.0002 - 0.2 mm
     def test_terminal_velocity_calculation(self):
 
-        diameters_p = self.sediment_organizer.confobj.generate_gaussian_distribution(0.05e-3, 0.01e-3/3.,
+        diameters_p = self.sediment_organizer.confobj.generate_gaussian_distribution(0.01e-3, 0.001e-3/3.,
                                                              self.sediment_organizer.confobj.number_of_particles)
         densities_p = self.sediment_organizer.confobj.generate_gaussian_distribution(1500, 500/3.,
                                                              self.sediment_organizer.confobj.number_of_particles)
