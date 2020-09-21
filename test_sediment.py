@@ -37,8 +37,8 @@ class TestSedimentDrift(TestGLOMMA_init):
     def test_generate_densities_returns_correct_range(self):
         min_d=100
         max_d=200
-        mean_d=1500
-        std_d=500/3.
+        mean_d=150
+        std_d=50/3.
 
         densities_p = self.sediment_organizer.confobj.generate_gaussian_distribution(mean_d, std_d,
                                                                                      self.sediment_organizer.confobj.number_of_particles)
