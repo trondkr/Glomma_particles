@@ -9,7 +9,7 @@ from calendar import monthrange
 __author__ = 'Trond Kristiansen'
 __email__ = 'me (at) trondkristiansen.com'
 __created__ = datetime(2020, 6, 29)
-__modified__ = datetime(2020, 7, 20)
+__modified__ = datetime(2020, 12, 11)
 __version__ = "1.0"
 __status__ = "Development, modified on 29.06.2020, 20.07.2020, 10.08.2020, 11.12.2020"
 

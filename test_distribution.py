@@ -83,7 +83,7 @@ class TestSedimentDistribution(unittest.TestCase):
         self.assertIsInstance(ds, xr.Dataset)
 
         res = self.distribution.get_indexes_of_last_valid_position(ds, var_name="test_var")
-        print(res)
+
         index_array_expected = []
         np.testing.assert_array_equal(res, index_array_expected)
 
