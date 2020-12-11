@@ -36,7 +36,7 @@ class SedimentElement(Lagrangian3DArray):
                          'default': 0}),
         ('diameter', {'dtype': np.float32,
                       'units': 'm',
-                      'default': 0.0001}),
+                      'default': 0.006546e-3}),
         ('density', {'dtype': np.float32,
                      'units': 'kg/L',
                      'default': 1500.0}),
@@ -52,39 +52,24 @@ class SedimentDrift(OceanDrift):
 
     ElementType = SedimentElement
 
-    required_variables = [
-        'x_sea_water_velocity',
-        'y_sea_water_velocity',
-        'sea_water_temperature',
-        'sea_water_salinity',
-        'upward_sea_water_velocity',
-        'x_wind', 'y_wind',
-        'sea_surface_wave_stokes_drift_x_velocity',
-        'sea_surface_wave_stokes_drift_y_velocity',
-        'sea_surface_wave_period_at_variance_spectral_density_maximum',
-        'sea_surface_wave_mean_period_from_variance_spectral_density_second_frequency_moment',
-        'land_binary_mask',
-        'ocean_vertical_diffusivity',
-        'sea_floor_depth_below_sea_level'
-    ]
-
-    fallback_values = {
-        'x_sea_water_velocity': 0, 'y_sea_water_velocity': 0,
-        'upward_sea_water_velocity': 0,
-        'sea_water_temperature': 10,
-        'sea_water_salinity': 35.0,
-        'x_wind': 0, 'y_wind': 0,
-        'sea_surface_wave_stokes_drift_x_velocity': 0,
-        'sea_surface_wave_stokes_drift_y_velocity': 0,
-        'sea_surface_wave_period_at_variance_spectral_density_maximum': 0,
-        'sea_surface_wave_mean_period_from_variance_spectral_density_second_frequency_moment': 0,
-        'ocean_vertical_diffusivity': .02,
+    required_variables = {
+        'x_sea_water_velocity': {'fallback': 0},
+        'y_sea_water_velocity': {'fallback': 0},
+        'sea_surface_wave_significant_height': {'fallback': 0},
+        'sea_ice_area_fraction': {'fallback': 0},
+        'x_wind': {'fallback': 0},
+        'y_wind': {'fallback': 0},
+        'land_binary_mask': {'fallback': None},
+        'sea_floor_depth_below_sea_level': {'fallback': 100},
+        'ocean_vertical_diffusivity': {'fallback': 0.02, 'profiles': True},
+        'sea_water_temperature': {'fallback': 10, 'profiles': True},
+        'sea_water_salinity': {'fallback': 34, 'profiles': True},
+        'surface_downward_x_stress': {'fallback': 0},
+        'surface_downward_y_stress': {'fallback': 0},
+        'turbulent_kinetic_energy': {'fallback': 0},
+        'turbulent_generic_length_scale': {'fallback': 0},
+        'upward_sea_water_velocity': {'fallback': 0},
     }
-
-    configspecSediment = '''
-        [vertical_mixing]
-            update_terminal_velocity = boolean(default=True)
-        '''
 
     def __init__(self, *args, **kwargs):
         """ Constructor of SedimentDrift module
@@ -94,8 +79,15 @@ class SedimentDrift(OceanDrift):
 
         # By default, sediments do not strand towards coastline
         # TODO: A more sophisticated stranding algorithm is needed
-        self.set_config('general:coastline_action', 'previous')
-        self._add_configstring(self.configspecSediment)
+        self._set_config_default('general:coastline_action', 'previous')
+
+        # Vertical mixing is enabled as default
+        self._set_config_default('drift:vertical_mixing', True)
+
+        self._add_config({'vertical_mixing:update_terminal_velocity': {'type': 'bool', 'default': True,
+                                                                   'description': 'Update terminal velocity',
+                                                                   'level': self.CONFIG_LEVEL_ESSENTIAL}
+                          })
 
     def update_terminal_velocity(self, Tprofiles=None, Sprofiles=None, z_index=None):
         #

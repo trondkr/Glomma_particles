@@ -67,6 +67,7 @@ class SedimentDistribution():
 
     def get_indexes_of_last_valid_position(self, ds, var_name="density"):
         # Assuming coordinates [time, trajectory]
+        print(ds)
         masked_data = np.ma.masked_invalid(ds[var_name].values)
         firstlast = np.ma.notmasked_edges(masked_data, axis=0)
 
@@ -160,7 +161,7 @@ class SedimentDistribution():
         start_date = pd.to_datetime(times[0])
         end_date = pd.to_datetime(times[-1])
 
-        output_filename = ct.create_animation_or_png_filename(start_date, end_date, "clay", "png")
+        output_filename = ct.create_animation_or_png_filename(start_date, end_date, "clay", filter_options, "png")
 
         self.createBins()
        # confobj.mymap.drawparallels(confobj.lat_bins,linewidth=0.2, fmt='%g'+ 'E', fontsize=5, color='gray', labels=[True,False,False,False])
@@ -191,20 +192,20 @@ class SedimentDistribution():
         plt.title("{} to {}".format(start_date, end_date))
         print("Printing figure to file {} ".format(output_filename))
         plt.savefig(output_filename, format='png', dpi=300)
-        plt.show()
+       # plt.show()
 
 
 def main():
     infilenames = glob.glob("output/*.nc")
-
-    filter_options = {"density_min": 0,
-                      "density_max": 2000.,
-                      "selected_month": None,
-                      #               "selected_day": 7,
-                      "status": 1}
-    for infile in infilenames:
-        distribution = SedimentDistribution()
-        distribution.create_distributional_map([infile], filter_options)
+    for status in [0, 1]:
+        filter_options = {"density_min": 0,
+                          "density_max": 2000.,
+                          "selected_month": None,
+                          #               "selected_day": 7,
+                          "status": status}
+        for infile in infilenames:
+            distribution = SedimentDistribution()
+            distribution.create_distributional_map([infile], filter_options)
 
 
 if __name__ == "__main__":

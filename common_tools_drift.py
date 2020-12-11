@@ -20,7 +20,7 @@ def find_depth(data):
     data['dif_depth'] =  data.sea_floor_depth_below_sea_level - data.z 
     return data
 
-def create_animation_or_png_filename(start_date,end_date, particle, postfix):
+def create_animation_or_png_filename(start_date,end_date, particle, filter_options, postfix):
 
     start_date_str: str = '{}{}{}'.format(str(start_date.year),
                                           str(start_date.month).zfill(2),
@@ -30,8 +30,8 @@ def create_animation_or_png_filename(start_date,end_date, particle, postfix):
                                         str(end_date.month).zfill(2),
                                         str(end_date.day).zfill(2))
 
-    output_filename = 'Figures/Glomma_{}_drift_{}_to_{}.{}'.format(particle, start_date_str,
-                                                                   end_date_str,
+    output_filename = 'Figures/Glomma_{}_drift_{}_to_{}_status_{}.{}'.format(particle, start_date_str,
+                                                                   end_date_str, filter_options["status"],
                                                                    postfix)
     if not os.path.exists('Figures'): os.mkdir('Figures')
     if os.path.exists(output_filename):

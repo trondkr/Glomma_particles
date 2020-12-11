@@ -1,9 +1,7 @@
 import logging
 import time
 from datetime import datetime, timedelta
-
 from opendrift.readers import reader_ROMS_native
-
 from config_sedimentdrift import MartiniConf
 from sedimentdrift import SedimentDrift
 from calendar import monthrange
@@ -13,10 +11,10 @@ __email__ = 'me (at) trondkristiansen.com'
 __created__ = datetime(2020, 6, 29)
 __modified__ = datetime(2020, 7, 20)
 __version__ = "1.0"
-__status__ = "Development, modified on 29.06.2020, 20.07.2020, 10.08.2020"
+__status__ = "Development, modified on 29.06.2020, 20.07.2020, 10.08.2020, 11.12.2020"
 
 
-class Sediment_Organizer:
+class Sediment_Organizer():
 
     def __init__(self):
         self.confobj: MartiniConf = MartiniConf()

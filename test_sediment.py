@@ -51,7 +51,7 @@ class TestSedimentDrift(TestGLOMMA_init):
     # done in Glomma June 2020. Particle sizes ranged from 0.0002 - 0.2 mm
     def test_terminal_velocity_calculation(self):
 
-        diameters_p = self.sediment_organizer.confobj.generate_gaussian_distribution(0.01e-3, 0.001e-3/3.,
+        diameters_p = self.sediment_organizer.confobj.generate_gaussian_distribution(0.006546e-3, 0.001e-3/3.,
                                                              self.sediment_organizer.confobj.number_of_particles)
         densities_p = self.sediment_organizer.confobj.generate_gaussian_distribution(1500, 500/3.,
                                                              self.sediment_organizer.confobj.number_of_particles)
@@ -63,7 +63,7 @@ class TestSedimentDrift(TestGLOMMA_init):
         self.assertIsNotNone(term_vel)
 
     def test_terminal_velocity_calculation_positive_buoyant_particles_rise(self):
-        diameters_p=np.asarray([0.1,0.1,0.1])/1000.
+        diameters_p=np.asarray([0.006546e-3,0.006546e-3,0.006546e-3])/1000.
         densities_p=np.asarray([1000,1005,1010])
 
         T0 = np.ones(len(diameters_p))*10.0
@@ -74,7 +74,7 @@ class TestSedimentDrift(TestGLOMMA_init):
         self.assertTrue(np.all(term_vel > 0))
 
     def test_terminal_velocity_calculation_negative_buoyant_particles_sink(self):
-        diameters_p=np.asarray([0.1,0.1,0.1])/1000.
+        diameters_p=np.asarray([0.006546e-3,0.006546e-3,0.006546e-3])/1000.
         densities_p=np.asarray([1035,1235,1110])
 
         T0 = np.ones(len(diameters_p))*10.0
@@ -85,8 +85,8 @@ class TestSedimentDrift(TestGLOMMA_init):
         self.assertTrue(np.all(term_vel < 0))
 
     def test_terminal_velocity_calculation_negative_and_postive_buoyant_particles_sink_and_rise(self):
-        diameters_p=np.asarray([0.1,0.1,0.1,0.1])/1000.
-        densities_p=np.asarray([1000,1006,1335,1110])
+        diameters_p=np.asarray([0.006546e-3,0.006546e-3,0.006546e-3,0.006546e-3])/1000.
+        densities_p=np.asarray([1000,1006,2335,2110])
 
         T0 = np.ones(len(diameters_p))*10.0
         S0 = np.ones(len(diameters_p))*27.0
