@@ -10,3 +10,5 @@ output/*
 Figures/**
 *.mp4
 .coverage
+slurm*
+core*

@@ -79,10 +79,10 @@ class SedimentDrift(OceanDrift):
 
         # By default, sediments do not strand towards coastline
         # TODO: A more sophisticated stranding algorithm is needed
-        self._set_config_default('general:coastline_action', 'previous')
+        self.set_config_default('general:coastline_action', 'previous')
 
         # Vertical mixing is enabled as default
-        self._set_config_default('drift:vertical_mixing', True)
+        self.set_config_default('drift:vertical_mixing', True)
 
         self._add_config({'vertical_mixing:update_terminal_velocity': {'type': 'bool', 'default': True,
                                                                    'description': 'Update terminal velocity',
