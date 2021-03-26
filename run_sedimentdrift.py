@@ -66,12 +66,13 @@ class Sediment_Organizer():
               time_step=timedelta(minutes=10),
               time_step_output=timedelta(minutes=20),
               outfile=self.confobj.outputFilename,
-              export_variables=['sea_floor_depth_below_sea_level', 'z', 'diameter', 'density','resuspended','terminal_velocity'])
+              export_variables=['sea_floor_depth_below_sea_level', 'z', 'diameter', 'density','resuspended',
+                                'terminal_velocity'])
 
-        o.animation(color='z', fast=False, buffer=.01, filename="test.mp4")
-       # o.plot_property('z', filename="test.png")
+       # o.animation(color='z', fast=False, buffer=.01, filename="test.mp4")
+        o.plot_property('z', filename="test.png")
 
-        o.animation_profile(filename="test.mp4")
+       # o.animation_profile(filename="test.mp4")
 
     def start_simulations(self):
         start_time = time.time()
