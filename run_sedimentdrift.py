@@ -11,13 +11,14 @@ __email__ = 'me (at) trondkristiansen.com'
 __created__ = datetime(2020, 6, 29)
 __modified__ = datetime(2020, 12, 11)
 __version__ = "1.0"
-__status__ = "Development, modified on 29.06.2020, 20.07.2020, 10.08.2020, 11.12.2020"
+__status__ = "Development, modified on 29.06.2020, 20.07.2020, 10.08.2020, " \
+             "11.12.2020, 26.03.2021"
 
 
 class Sediment_Organizer():
 
     def __init__(self):
-        self.confobj = MartiniConf()
+        self.confobj:MartiniConf = MartiniConf()
 
     # Setup the sediment object and configuration
     def setup_and_config_sediment_module(self) -> SedimentDrift:
@@ -28,7 +29,7 @@ class Sediment_Organizer():
         o.set_config('vertical_mixing:diffusivitymodel', 'gls_tke')
         o.set_config('vertical_mixing:TSprofiles', False)
         o.set_config('drift:advection_scheme', 'euler')
-        o.set_config('drift:lift_to_seafloor', True)
+        o.set_config('general:seafloor_action', 'lift_to_seafloor')
         o.set_config('vertical_mixing:update_terminal_velocity', True)
         o.set_config('drift:current_uncertainty', .2)
         o.set_config('drift:wind_uncertainty', 2)
