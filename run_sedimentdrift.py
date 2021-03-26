@@ -54,11 +54,11 @@ class Sediment_Organizer():
                         lat=self.confobj.st_lats,
                         number=self.confobj.number_of_particles,
                         radius=[self.confobj.release_radius],
-                        cone=False,
                         diameter=self.confobj.diameters,
                         density=self.confobj.densities,
                         time=[self.confobj.start_date, self.confobj.end_date],
                         z=self.confobj.init_release_depths())
+
 
         logging.debug('Elements scheduled for {} : {}'.format(self.confobj.species, o.elements_scheduled))
 
