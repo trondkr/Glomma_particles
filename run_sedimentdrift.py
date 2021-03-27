@@ -5,6 +5,7 @@ from opendrift.readers import reader_ROMS_native
 from config_sedimentdrift import MartiniConf
 from sedimentdrift import SedimentDrift
 from calendar import monthrange
+import dask
 
 __author__ = 'Trond Kristiansen'
 __email__ = 'me (at) trondkristiansen.com'
@@ -35,6 +36,8 @@ class Sediment_Organizer():
         o.set_config('drift:wind_uncertainty', 2)
         o.set_config('vertical_mixing:diffusivitymodel', 'windspeed_Large1994')
 
+        dask.config.set({"array.slicing.split_large_chunks": True})
+
         return o
 
     def create_MARTINI_input_file_list(self):
@@ -44,8 +47,12 @@ class Sediment_Organizer():
     def create_and_run_simulation(self):
         o = self.setup_and_config_sediment_module()
         reader_physics = reader_ROMS_native.Reader(self.create_MARTINI_input_file_list())
+        reader_arome = reader_netCDF_CF_generic.Reader(
+            'https://thredds.met.no/thredds/dodsC/mepslatest/meps_lagged_6_h_latest_2_5km_latest.nc')
+
         o.multiprocessing_fail = True
-        o.add_reader([reader_physics])
+        o.add_reader([reader_physics, reader_arome])
+        print(o)
 
         logging.debug("Releasing {} sediments between {} and {}".format(self.confobj.species,
                                                                         self.confobj.start_date,
