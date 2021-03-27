@@ -22,7 +22,7 @@
 #SBATCH --partition=normal
 ##SBATCH --qos=devel
 ##SBATCH --qos=short
-#SBATCH --qos=preproc
+#SBATCH --qos=devel
 
 # memory per core and no. nodes (only specify on bigmem partition)
 ##SBATCH --mem-per-cpu=1000MB
