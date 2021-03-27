@@ -1,7 +1,7 @@
 import logging
 import time
 from datetime import datetime, timedelta
-from opendrift.readers import reader_ROMS_native
+from opendrift.readers import reader_ROMS_native, reader_netCDF_CF_generic
 from config_sedimentdrift import MartiniConf
 from sedimentdrift import SedimentDrift
 from calendar import monthrange
