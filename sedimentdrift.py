@@ -156,7 +156,7 @@ class SedimentDrift(OceanDrift):
 
         self.advect_wind()  # Wind shear in upper 10cm of ocean
 
-      #  self.stokes_drift()
+        self.stokes_drift()
 
         self.vertical_mixing()  # Including buoyancy and settling
 
