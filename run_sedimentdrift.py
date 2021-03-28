@@ -47,7 +47,7 @@ class Sediment_Organizer():
     def create_and_run_simulation(self):
         o = self.setup_and_config_sediment_module()
         reader_physics = reader_ROMS_native.Reader(self.create_MARTINI_input_file_list())
-        reader_arome = reader_netCDF_CF_generic.Reader("/cluster/work/support/jonal/Trond/arome_metcoop_default2_5km_NK800ROMS_2019.nc")
+        reader_arome = reader_netCDF_CF_generic.Reader(["/cluster/work/support/jonal/Trond/arome_metcoop_default2_5km_NK800ROMS_2019.nc"])
 
         #    'https://thredds.met.no/thredds/dodsC/mepslatest/meps_lagged_6_h_latest_2_5km_latest.nc')
 
