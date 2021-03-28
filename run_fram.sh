@@ -16,10 +16,10 @@
 #              d-hh:mm:ss
 ##SBATCH --time=1-00:00:00
 ##SBATCH --time=0-00:30:00
-#SBATCH --time=0-23:50:00
+#SBATCH --time=0-00:30:00
 
 # choose partition
-#SBATCH --partition=normal
+##SBATCH --partition=normal
 ##SBATCH --qos=devel
 ##SBATCH --qos=short
 #SBATCH --qos=devel
