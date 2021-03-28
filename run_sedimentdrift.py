@@ -51,7 +51,7 @@ class Sediment_Organizer():
             'https://thredds.met.no/thredds/dodsC/mepslatest/meps_lagged_6_h_latest_2_5km_latest.nc')
 
         o.multiprocessing_fail = True
-        o.add_reader([reader_physics, reader_arome])
+        o.add_reader([reader_physics]) #, reader_arome])
         print(o)
 
         logging.debug("Releasing {} sediments between {} and {}".format(self.confobj.species,

@@ -69,8 +69,8 @@ class SedimentDrift(OceanDrift):
         'turbulent_kinetic_energy': {'fallback': 0},
         'turbulent_generic_length_scale': {'fallback': 0},
         'upward_sea_water_velocity': {'fallback': 0},
-        'sea_surface_wave_stokes_drift_x_velocity': {'fallback': 0},
-        'sea_surface_wave_stokes_drift_y_velocity': {'fallback': 0}
+        'sea_surface_wave_stokes_drift_x_velocity': {'fallback': 0.01},
+        'sea_surface_wave_stokes_drift_y_velocity': {'fallback': 0.01}
     }
 
     def __init__(self, *args, **kwargs):
