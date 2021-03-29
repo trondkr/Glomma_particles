@@ -10,10 +10,10 @@ import dask
 __author__ = 'Trond Kristiansen'
 __email__ = 'me (at) trondkristiansen.com'
 __created__ = datetime(2020, 6, 29)
-__modified__ = datetime(2020, 12, 11)
+__modified__ = datetime(2021, 3, 28)
 __version__ = "1.0"
 __status__ = "Development, modified on 29.06.2020, 20.07.2020, 10.08.2020, " \
-             "11.12.2020, 26.03.2021"
+             "11.12.2020, 26.03.2021, 28.03.2021"
 
 
 class Sediment_Organizer():
@@ -45,6 +45,7 @@ class Sediment_Organizer():
         return [self.confobj.datadir+self.confobj.pattern+str(i).zfill(4)+".nc" for i in range(730, 1096)]
 
     def create_and_run_simulation(self):
+
         o = self.setup_and_config_sediment_module()
         reader_physics = reader_ROMS_native.Reader(self.create_MARTINI_input_file_list())
         #reader_arome = reader_netCDF_CF_generic.Reader(["/cluster/work/support/jonal/Trond/arome_metcoop_default2_5km_NK800ROMS_2019.nc"])
@@ -78,7 +79,7 @@ class Sediment_Organizer():
                                 'terminal_velocity'])
 
        # o.animation(color='z', fast=False, buffer=.01, filename="test.mp4")
-        o.plot_property('z', filename="test.png")
+        o.plot_property('z', filename="Glomma_{}_to_{}.png".format(self.confobj.start_date,self.confobj.end_date))
 
        # o.animation_profile(filename="test.mp4")
 

@@ -42,12 +42,12 @@ class MartiniConf():
         # Glomma - seed locations
         self.st_lons = [10.962920]
         self.st_lats = [59.169194]
-        self.number_of_particles = 2000
+        self.number_of_particles = 1000
         self.release_radius = 500
         # diameter in meter, densities in kg/m3
 
-        self.diameters = self.generate_uniform_distribution(0.000898, 0.348323, self.number_of_particles)
-        self.densities = np.flip(self.generate_uniform_distribution(1000,2650, self.number_of_particles), axis=0)
+        self.diameters = self.generate_uniform_distribution(6.5461e-6, 348.1323e-6, self.number_of_particles)
+        self.densities = np.flip(self.generate_uniform_distribution(2650,2650, self.number_of_particles), axis=0)
 
         self.outputFilename = None
         self.results_startdate = None
@@ -88,7 +88,7 @@ class MartiniConf():
     def init_release_depths(self) -> List[str]:
         if not os.path.exists(self.outputdir): os.mkdir(self.outputdir)
 
-        # Spread particles/sediments using a Gauss shape in the upper surface
+        # Spread particles/sediments usin   g a Gauss shape in the upper surface
         low_depth, mean_depth, high_depth = -0.05, -0.01, 0
         stdev = (low_depth - mean_depth) / 3.
         z_levels = []

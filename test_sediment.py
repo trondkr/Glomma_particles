@@ -74,8 +74,8 @@ class TestSedimentDrift(TestGLOMMA_init):
         self.assertTrue(np.all(term_vel > 0))
 
     def test_terminal_velocity_calculation_exact_from_Phil(self):
-        # Test the setyup of diameters and densities and velocities used by Phil in
-        # ROMS and compare with our Stokes settlement velocities.
+        # Test the setup of diameters and densities and velocities used by Phil in
+        # ROMS and compare with our Stokes settlement velocities. These are cohesive particles
         diameters_p = np.asarray([0.000898e-3, 0.002424e-3, 0.006546e-3, 0.017678e-3, 0.047738e-3, 0.128917e-3, 0.348323e-3])
         densities_p = np.asarray([1981.330, 1611.396, 1313.938, 1141.585, 1064.706, 1037.335, 1029.366])
 
@@ -89,6 +89,24 @@ class TestSedimentDrift(TestGLOMMA_init):
         self.assertTrue(np.all(term_vel < 0))
 
         np.testing.assert_allclose(settling_velocities,term_vel, atol=1e-3)
+
+    def test_non_cohesive_terminal_velocity_calculation_exact_from_Phil(self):
+        # Test the setup of diameters and densities and velocities used by Phil in
+        # ROMS and compare with our Stokes settlement velocities. These are cohesive particles
+        diameters_p = np.asarray(
+            [6.5461e-6, 17.6777e-6, 47.7384e-6, 128.9173e-6, 348.1323e-6])
+        densities_p = np.asarray([2650.0, 2650.0, 2650.0, 2650.0, 2650.0])
+
+        # The settling velocities are taken from Phil for testing (mm/s)
+        settling_velocities = np.asarray([-0.0271e-3, -0.1979e-3, -1.4433e-3, -10.5253e-3, -76.7539e-3])
+        T0 = np.ones(len(diameters_p)) * 10.0
+        S0 = np.ones(len(diameters_p)) * 27.0
+        term_vel = self.sediment_drift.calc_terminal_velocity(densities_p, diameters_p, T0, S0)
+
+        self.assertIsNotNone(term_vel)
+        self.assertTrue(np.all(term_vel < 0))
+
+        np.testing.assert_allclose(settling_velocities, term_vel, atol=1e-3)
 
     def test_terminal_velocity_calculation_negative_buoyant_particles_sink(self):
         diameters_p=np.asarray([0.006546e-3,0.006546e-3,0.006546e-3])/1000.
