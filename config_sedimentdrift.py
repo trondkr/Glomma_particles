@@ -42,12 +42,12 @@ class MartiniConf():
         # Glomma - seed locations
         self.st_lons = [10.962920]
         self.st_lats = [59.169194]
-        self.number_of_particles = 500
-        self.release_radius = 500
+        self.number_of_particles = 2000
+        self.release_radius = 250
         # diameter in meter, densities in kg/m3
 
         self.diameters = self.generate_uniform_distribution(6.5461e-6, 348.1323e-6, self.number_of_particles)
-        self.densities = np.flip(self.generate_uniform_distribution(2650,2650, self.number_of_particles), axis=0)
+        self.densities = np.flip(self.generate_uniform_distribution(2600,2650, self.number_of_particles), axis=0)
 
         self.outputFilename = None
         self.results_startdate = None
