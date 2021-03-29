@@ -40,9 +40,12 @@ class Sediment_Organizer():
 
         return o
 
-    def create_MARTINI_input_file_list(self):
+    def create_MARTINI_input_file_list(self,start_index, end_index):
         # Files for 2019 starts at index 730 (01/01/2019) and ends at 1095 (31/12/2019)
-        return [self.confobj.datadir+self.confobj.pattern+str(i).zfill(4)+".nc" for i in range(730, 1096)]
+        start_index=self.confobj.start_date.timetuple().tm_yday - 1 + 730
+        end_index = self.confobj.end_date.timetuple().tm_yday + 1 + 730
+
+        return [self.confobj.datadir+self.confobj.pattern+str(i).zfill(4)+".nc" for i in range(start_index, end_index)]
 
     def create_and_run_simulation(self):
 
@@ -52,7 +55,7 @@ class Sediment_Organizer():
 
         #    'https://thredds.met.no/thredds/dodsC/mepslatest/meps_lagged_6_h_latest_2_5km_latest.nc')
 
-        o.multiprocessing_fail = True
+        o.__parallel_fail__ = True
         o.add_reader([reader_physics]) #, reader_arome])
         print(o)
 
