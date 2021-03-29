@@ -40,7 +40,7 @@ class Sediment_Organizer():
 
         return o
 
-    def create_MARTINI_input_file_list(self,start_index, end_index):
+    def create_MARTINI_input_file_list(self):
         # Files for 2019 starts at index 730 (01/01/2019) and ends at 1095 (31/12/2019)
         start_index=self.confobj.start_date.timetuple().tm_yday - 1 + 730
         end_index = self.confobj.end_date.timetuple().tm_yday + 1 + 730
