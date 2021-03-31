@@ -47,12 +47,13 @@ class SedimentDistribution():
     def filter_data(self, df, filter_options: List):
         np.warnings.filterwarnings('ignore')
 
-        df = df[df.status == (filter_options["status"])]
+      #  df = df[df.status == (filter_options["status"])]
 
-        if "density_max" and "density_min" in filter_options.keys() and not None:
-            df = df[(df.density >= float(filter_options["density_min"]))
-                    & (df.density <= float(filter_options["density_max"]))
-                    & (df.status == int(filter_options["status"]))]
+        if "diameter_max" and "diameter_min" in filter_options.keys() and not None:
+            df = df[(df.diameter >= float(filter_options["diameter_min"]))
+                    & (df.diameter <= float(filter_options["diameter_max"]))]
+
+            #        & (df.status == int(filter_options["status"]))]
 
         if "selected_month" in filter_options.keys() and filter_options["selected_month"] is not None:
             df = df[df.time.dt.month == int(filter_options["selected_month"])]
@@ -169,11 +170,23 @@ class SedimentDistribution():
 
         nlevels = 10
         Xd, Yd, density = self.get_density(lats, lons, nlevels)
+        levels = MaxNLocator(nbins=nlevels).tick_values(0, 20)
+        print(np.shape(Xd), np.shape(Yd), np.shape(density))
+        cmap = plt.get_cmap('PiYG')
+     #   cplot = self.config.ax.contourf(Xd[:-1, :-1],
+     #                                   Yd[:-1, :-1],
+     #                                     density,
+     #                                     cmap=cmap,
+     #                                     levels=levels,
+     #                                     edgecolors='face',
+     #                                     linewidths=0.1)
 
-        cplot = self.config.ax.pcolormesh(Xd, Yd, density,
-                                          cmap="RdYlBu_r",
-                                          edgecolors='face',
-                                          linewidths=0.1)
+        cplot = self.config.ax.pcolormesh(Xd,
+                                        Yd,
+                                        density,
+                                        cmap=cmap,
+                                        edgecolors='face',
+                                        linewidths=0.1)
         # cs = confobj.mymap.contourf(Xd[:-1, :-1],Yd[:-1, :-1], density, cmap=confobj.cmap,levels = 50) #,edgecolors='face',linewidths=0.1) #,alpha=0.8)  #norm=norm,
 
         # Seed area drawn as a circle
@@ -189,7 +202,7 @@ class SedimentDistribution():
                             markersize=1)
         plt.colorbar(cplot, shrink=0.7)
         self.config.ax.plot(X, Y, marker=None, color='w', linewidth=1.0)
-        plt.title("{} to {}".format(start_date, end_date))
+     #   plt.title("{} to {}".format(start_date, end_date))
         print("Printing figure to file {} ".format(output_filename))
         plt.savefig(output_filename, format='png', dpi=300)
        # plt.show()
@@ -197,15 +210,17 @@ class SedimentDistribution():
 
 def main():
     infilenames = glob.glob("output/*.nc")
-    for status in [0, 1]:
-        filter_options = {"density_min": 0,
-                          "density_max": 2000.,
-                          "selected_month": None,
+
+    # Loop over two size categories to se where particles end up depending on diameter
+    for diameter_min, diameter_max in zip([0, 100.e-6],[100.e-6, 350.e-6]):
+        filter_options = {"diameter_min": diameter_min,
+                          "diameter_max": diameter_max,
+                          "selected_month": None}
                           #               "selected_day": 7,
-                          "status": status}
-        for infile in infilenames:
-            distribution = SedimentDistribution()
-            distribution.create_distributional_map([infile], filter_options)
+                        #  "status": status}
+        #for infile in infilenames:
+        distribution = SedimentDistribution()
+        distribution.create_distributional_map(infilenames, filter_options)
 
 
 if __name__ == "__main__":

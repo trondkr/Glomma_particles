@@ -30,8 +30,10 @@ def create_animation_or_png_filename(start_date,end_date, particle, filter_optio
                                         str(end_date.month).zfill(2),
                                         str(end_date.day).zfill(2))
 
-    output_filename = 'Figures/Glomma_{}_drift_{}_to_{}_status_{}.{}'.format(particle, start_date_str,
-                                                                   end_date_str, filter_options["status"],
+    output_filename = 'Figures/Glomma_{}_drift_{}_to_{}_diameter_{}_to_{}.{}'.format(particle, start_date_str,
+                                                                   end_date_str,
+                                                                   filter_options["diameter_min"],
+                                                                   filter_options["diameter_max"],
                                                                    postfix)
     if not os.path.exists('Figures'): os.mkdir('Figures')
     if os.path.exists(output_filename):

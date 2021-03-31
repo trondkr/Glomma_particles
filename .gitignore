@@ -12,3 +12,4 @@ Figures/**
 .coverage
 slurm*
 core*
+*.png

@@ -42,7 +42,7 @@ class MartiniConf():
         # Glomma - seed locations
         self.st_lons = [10.962920]
         self.st_lats = [59.169194]
-        self.number_of_particles = 1000
+        self.number_of_particles = 100
         self.release_radius = 300
         # diameter in meter, densities in kg/m3
 
@@ -57,7 +57,7 @@ class MartiniConf():
         # Diameters in meter
         dist = np.asarray(
             [random.uniform(part_min, part_max) for i in range(number)])
-        return np.where(dist < 0, 0.0001e-12, dist)
+        return np.where(dist < 0, part_min, dist)
 
     def generate_gaussian_distribution(self, part_mean, part_std, number):
         # Diameters in meter

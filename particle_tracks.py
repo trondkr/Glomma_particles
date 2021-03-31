@@ -27,19 +27,19 @@ class Tracks():
             y = self.lats[traj_index, (self.lats[traj_index, :] < 1e30)]
             z = self.z[traj_index, (self.lats[traj_index, :] < 1e30)]
 
-         #   self.config.ax.plot(x,
-         #                       y,
-         #                       c='k',
-         #                       alpha=0.5,
-         #                       linewidth=0.2)
+            self.config.ax.plot(x,
+                                y,
+                                c='k',
+                                alpha=0.2,
+                                linewidth=0.2)
             if len(z > 0):
                # scaled_z = (z - z.min()) / z.ptp()
-                colors = plt.cm.viridis(z)
+                colors = plt.get_cmap('PiYG')
                 print("[Particle_tracks] depth variation {} to {}".format(z.min(),z.max()))
                 cbar = self.config.ax.scatter(x, y, marker=None,
                                        facecolors=colors,
                                        s=2,
-                                  alpha=0.5,
+                                  alpha=0.8,
                                   linewidth=0.3)
 
         # Seed area drawn as a circle
