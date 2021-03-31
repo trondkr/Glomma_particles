@@ -28,7 +28,7 @@ class MartiniConf():
         print('\n--------------------------\n')
         print('Started ' + time.ctime(time.time()))
         self.debug = True
-        self.start_date: datetime = datetime(2019, 1, 1)
+        self.start_date: datetime = datetime(2019, 4, 1)
         self.end_date: datetime = datetime(2019, 12, 30)
         self.outputdir = None
         self.verticalBehavior = False
@@ -42,7 +42,7 @@ class MartiniConf():
         # Glomma - seed locations
         self.st_lons = [10.962920]
         self.st_lats = [59.169194]
-        self.number_of_particles = 100
+        self.number_of_particles = 200
         self.release_radius = 300
         # diameter in meter, densities in kg/m3
 
