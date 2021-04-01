@@ -100,7 +100,7 @@ class Sediment_Organizer():
 
 
 def main():
-    for month in range(9,13,1):
+    for month in range(10,13,1):
         run = Sediment_Organizer()
         days_in_month = int(monthrange(2019, month)[1])
         run.confobj.start_date = datetime(2019, month, 1)
